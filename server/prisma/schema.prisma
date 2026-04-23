@@ -155,7 +155,7 @@ model SlaRule {
   scope            RuleScope    @default(GLOBAL)
   scopeRef         String?
   alertChannels    AlertChannel[]
-  alertRecipients  String[]
+                                      alertRecipients  String[]
   createdAt        DateTime     @default(now())
   updatedAt        DateTime     @updatedAt
 
