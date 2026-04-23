@@ -7,14 +7,16 @@ const router = express.Router();
 
 async function ingest(source, body) {
   const normalized = mapIncomingEvent({ source, body });
+  const fallbackCustomerCode = `auto:${normalized.customer.email || normalized.customer.fullName}`;
+  const resolvedCustomerCode = normalized.customer.customerCode || fallbackCustomerCode;
 
   return prisma.$transaction(async (tx) => {
     const customer = await tx.customer.upsert({
       where: {
-        customerCode: normalized.customer.customerCode || `auto:${normalized.customer.email || normalized.customer.fullName}`
+        customerCode: resolvedCustomerCode
       },
       create: {
-        customerCode: normalized.customer.customerCode || null,
+        customerCode: resolvedCustomerCode,
         fullName: normalized.customer.fullName,
         email: normalized.customer.email,
         phone: normalized.customer.phone,
