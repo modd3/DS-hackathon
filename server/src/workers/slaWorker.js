@@ -1,4 +1,5 @@
 const { prisma } = require('../lib/prisma');
+const DEFAULT_ALERT_RECIPIENT = process.env.ALERT_DEFAULT_RECIPIENT || 'operations@dayliff.local';
 
 function minutesBetween(start, end) {
   return Math.floor((end.getTime() - start.getTime()) / (1000 * 60));
@@ -42,6 +43,10 @@ async function evaluateSlaBreaches(now = new Date()) {
 
       if (existing) continue;
 
+      const recipients = rule.alertRecipients.length > 0
+        ? rule.alertRecipients
+        : [DEFAULT_ALERT_RECIPIENT];
+
       await prisma.slaBreach.create({
         data: {
           journeyId: journey.id,
@@ -50,11 +55,11 @@ async function evaluateSlaBreaches(now = new Date()) {
           breachedAt: now,
           durationMins,
           alerts: {
-            create: rule.alertChannels.map((channel) => ({
+            create: rule.alertChannels.flatMap((channel) => recipients.map((recipient) => ({
               channel,
-              recipient: 'operations@dayliff.local',
+              recipient,
               status: 'PENDING'
-            }))
+            })))
           }
         }
       });

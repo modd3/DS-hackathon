@@ -86,4 +86,7 @@ Each endpoint should:
 - ✅ SLA evaluation worker implemented with breach + alert record creation.
 - ✅ Queue decoupling implemented with an in-process event bus abstraction (ready to swap with RabbitMQ/Redis Streams).
 - ✅ Dead-letter queue handling added to in-process bus with retries and requeue support.
-- ⏭️ Next: replace in-process bus with external durable broker (RabbitMQ/Redis Streams) and persistent DLQ storage.
+- ✅ SLA scheduler enabled from server bootstrap for periodic breach checks.
+- ✅ Internal queue routes protected with auth token middleware.
+- 📝 Note: `journey.currentStage` is only advanced on stage-bearing events; non-stage updates intentionally do not clear it.
+- ⏭️ Next: replace in-process bus with external durable broker (RabbitMQ/Redis Streams), add persistent DLQ storage, and implement alert delivery worker.
