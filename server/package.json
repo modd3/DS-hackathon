@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
-    "check": "node --check src/server.js && node --check src/app.js && node --check src/routes/webhooks.js && node --check src/routes/journeys.js && node --check src/services/eventMapper.js && node --check src/services/journeyTimelineService.js && node --check src/workers/slaWorker.js"
+    "check": "node --check src/server.js && node --check src/app.js && node --check src/routes/webhooks.js && node --check src/routes/journeys.js && node --check src/services/eventMapper.js && node --check src/services/journeyTimelineService.js && node --check src/services/ingestionProcessor.js && node --check src/lib/eventBus.js && node --check src/workers/ingestionConsumer.js && node --check src/workers/slaWorker.js"
   },
   "dependencies": {
     "@prisma/client": "^6.10.0",

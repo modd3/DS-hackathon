@@ -84,4 +84,5 @@ Each endpoint should:
 - ✅ Canonical event mapping + schema validation implemented.
 - ✅ Journey timeline and current-status APIs implemented.
 - ✅ SLA evaluation worker implemented with breach + alert record creation.
-- ⏭️ Next: integrate queue transport (RabbitMQ/Redis Streams) between ingest and persistence.
+- ✅ Queue decoupling implemented with an in-process event bus abstraction (ready to swap with RabbitMQ/Redis Streams).
+- ⏭️ Next: replace in-process bus with external durable broker + dead-letter queue.
