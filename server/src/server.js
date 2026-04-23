@@ -5,11 +5,13 @@ const { startIngestionConsumer } = require('./workers/ingestionConsumer');
 const { evaluateSlaBreaches } = require('./workers/slaWorker');
 const { dispatchPendingAlerts } = require('./workers/alertDeliveryWorker');
 const { getBrokerHealth } = require('./lib/eventBus');
+const { evaluateSloPolicies } = require('./workers/sloPolicyWorker');
 
 const port = Number(process.env.PORT || 4000);
 const slaIntervalMs = Number(process.env.SLA_INTERVAL_MS || 5 * 60 * 1000);
 const alertDispatchIntervalMs = Number(process.env.ALERT_DISPATCH_INTERVAL_MS || 60 * 1000);
 const brokerHealthIntervalMs = Number(process.env.BROKER_HEALTH_INTERVAL_MS || 60 * 1000);
+const sloEvalIntervalMs = Number(process.env.SLO_EVAL_INTERVAL_MS || 60 * 1000);
 
 initTelemetry();
 startIngestionConsumer();
@@ -36,6 +38,12 @@ setInterval(() => {
       console.error('[broker-health][ALERT] probe failed', error.message);
     });
 }, brokerHealthIntervalMs);
+
+setInterval(() => {
+  evaluateSloPolicies().catch((error) => {
+    console.error('[slo-policy][ALERT] evaluation failed', error.message);
+  });
+}, sloEvalIntervalMs);
 
 app.listen(port, () => {
   console.log(`Dayliff 1000 Eyes server listening on port ${port}`);

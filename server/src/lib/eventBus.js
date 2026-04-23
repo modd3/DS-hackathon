@@ -91,6 +91,15 @@ function encodeMessage(normalized, attempts = 0, reason = null) {
   };
 }
 
+function withTraceFields(fields, traceContext = {}) {
+  return {
+    ...fields,
+    traceparent: traceContext.traceparent || '',
+    tracestate: traceContext.tracestate || '',
+    baggage: traceContext.baggage || ''
+  };
+}
+
 function decodeFields(fieldArray) {
   const mapped = {};
   for (let i = 0; i < fieldArray.length; i += 2) {
@@ -109,7 +118,7 @@ async function ensureRedisConsumerGroup() {
   }
 }
 
-async function enqueueFileState(normalized) {
+async function enqueueFileState(normalized, options = {}) {
   if (state.queue.length >= MAX_QUEUE_SIZE) {
     const error = new Error('Queue capacity reached.');
     error.code = 'QUEUE_FULL';
@@ -120,7 +129,8 @@ async function enqueueFileState(normalized) {
     id: createQueueId(),
     enqueuedAt: new Date().toISOString(),
     attempts: 0,
-    normalized
+    normalized,
+    traceContext: options.traceContext || {}
   };
 
   state.queue.push(message);
@@ -130,24 +140,41 @@ async function enqueueFileState(normalized) {
   return message;
 }
 
-async function enqueueRedisStreams(normalized) {
-  const fields = encodeMessage(normalized, 0);
-  const id = await redisCommand('XADD', [REDIS_STREAM_KEY, '*', 'payload', fields.payload, 'attempts', fields.attempts, 'reason', fields.reason]);
+async function enqueueRedisStreams(normalized, options = {}) {
+  const baseFields = encodeMessage(normalized, 0);
+  const fields = withTraceFields(baseFields, options.traceContext);
+  const id = await redisCommand('XADD', [
+    REDIS_STREAM_KEY,
+    '*',
+    'payload',
+    fields.payload,
+    'attempts',
+    fields.attempts,
+    'reason',
+    fields.reason,
+    'traceparent',
+    fields.traceparent,
+    'tracestate',
+    fields.tracestate,
+    'baggage',
+    fields.baggage
+  ]);
 
   return {
     id,
     enqueuedAt: new Date().toISOString(),
     attempts: 0,
-    normalized
+    normalized,
+    traceContext: options.traceContext || {}
   };
 }
 
-async function enqueueNormalizedEvent(normalized) {
+async function enqueueNormalizedEvent(normalized, options = {}) {
   if (BROKER_PROVIDER === 'redis-streams') {
-    return enqueueRedisStreams(normalized);
+    return enqueueRedisStreams(normalized, options);
   }
 
-  return enqueueFileState(normalized);
+  return enqueueFileState(normalized, options);
 }
 
 function moveToDeadLetterFileState(message, reason) {
@@ -162,8 +189,11 @@ function moveToDeadLetterFileState(message, reason) {
 }
 
 async function moveToDeadLetterRedis(message, reason) {
-  const fields = encodeMessage(message.normalized, message.attempts, reason);
-  await redisCommand('XADD', [REDIS_DLQ_STREAM_KEY, '*', 'payload', fields.payload, 'attempts', fields.attempts, 'reason', fields.reason]);
+  const fields = withTraceFields(
+    encodeMessage(message.normalized, message.attempts, reason),
+    message.traceContext
+  );
+  await redisCommand('XADD', [REDIS_DLQ_STREAM_KEY, '*', 'payload', fields.payload, 'attempts', fields.attempts, 'reason', fields.reason, 'traceparent', fields.traceparent, 'tracestate', fields.tracestate, 'baggage', fields.baggage]);
 }
 
 function processNextFileState(handler) {
@@ -212,12 +242,18 @@ async function processRedisEntry(handler, entryId, fieldArray) {
   const fields = decodeFields(fieldArray);
   const attempts = Number(fields.attempts || 0);
   const normalized = JSON.parse(fields.payload);
+  const traceContext = {
+    traceparent: fields.traceparent || '',
+    tracestate: fields.tracestate || '',
+    baggage: fields.baggage || ''
+  };
 
   try {
     await handler({
       id: entryId,
       attempts,
-      normalized
+      normalized,
+      traceContext
     });
 
     await redisCommand('XACK', [REDIS_STREAM_KEY, REDIS_CONSUMER_GROUP, entryId]);
@@ -227,8 +263,8 @@ async function processRedisEntry(handler, entryId, fieldArray) {
     if (nextAttempts >= MAX_ATTEMPTS) {
       await moveToDeadLetterRedis({ normalized, attempts: nextAttempts }, error.message);
     } else {
-      const retryFields = encodeMessage(normalized, nextAttempts, error.message);
-      await redisCommand('XADD', [REDIS_STREAM_KEY, '*', 'payload', retryFields.payload, 'attempts', retryFields.attempts, 'reason', retryFields.reason]);
+      const retryFields = withTraceFields(encodeMessage(normalized, nextAttempts, error.message), traceContext);
+      await redisCommand('XADD', [REDIS_STREAM_KEY, '*', 'payload', retryFields.payload, 'attempts', retryFields.attempts, 'reason', retryFields.reason, 'traceparent', retryFields.traceparent, 'tracestate', retryFields.tracestate, 'baggage', retryFields.baggage]);
     }
 
     await redisCommand('XACK', [REDIS_STREAM_KEY, REDIS_CONSUMER_GROUP, entryId]);
@@ -417,7 +453,12 @@ async function listDeadLetters(limit = 50) {
         id,
         attempts: Number(mapped.attempts || 0),
         reason: mapped.reason || '',
-        normalized: JSON.parse(mapped.payload)
+        normalized: JSON.parse(mapped.payload),
+        traceContext: {
+          traceparent: mapped.traceparent || '',
+          tracestate: mapped.tracestate || '',
+          baggage: mapped.baggage || ''
+        }
       };
     });
   }
@@ -433,16 +474,22 @@ async function requeueDeadLetter(messageId) {
     const [id, fields] = result[0];
     const mapped = decodeFields(fields);
     const normalized = JSON.parse(mapped.payload);
+    const traceContext = {
+      traceparent: mapped.traceparent || '',
+      tracestate: mapped.tracestate || '',
+      baggage: mapped.baggage || ''
+    };
 
-    const retryFields = encodeMessage(normalized, 0);
-    const newId = await redisCommand('XADD', [REDIS_STREAM_KEY, '*', 'payload', retryFields.payload, 'attempts', retryFields.attempts, 'reason', retryFields.reason]);
+    const retryFields = withTraceFields(encodeMessage(normalized, 0), traceContext);
+    const newId = await redisCommand('XADD', [REDIS_STREAM_KEY, '*', 'payload', retryFields.payload, 'attempts', retryFields.attempts, 'reason', retryFields.reason, 'traceparent', retryFields.traceparent, 'tracestate', retryFields.tracestate, 'baggage', retryFields.baggage]);
     await redisCommand('XDEL', [REDIS_DLQ_STREAM_KEY, id]);
 
     return {
       id: newId,
       enqueuedAt: new Date().toISOString(),
       attempts: 0,
-      normalized
+      normalized,
+      traceContext
     };
   }
 
@@ -461,7 +508,8 @@ async function requeueDeadLetter(messageId) {
     id: deadLetter.id,
     enqueuedAt: new Date().toISOString(),
     attempts: 0,
-    normalized: deadLetter.normalized
+    normalized: deadLetter.normalized,
+    traceContext: deadLetter.traceContext || {}
   };
 
   state.queue.push(message);

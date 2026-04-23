@@ -2,6 +2,7 @@ const express = require('express');
 const { getQueueStats, getBrokerMetrics, getBrokerHealth, listDeadLetters, requeueDeadLetter } = require('../lib/eventBus');
 const { verifyWebhookAuth } = require('../middleware/verifyWebhookAuth');
 const { dispatchPendingAlerts } = require('../workers/alertDeliveryWorker');
+const { evaluateSloPolicies } = require('../workers/sloPolicyWorker');
 
 const router = express.Router();
 
@@ -71,6 +72,15 @@ router.post('/alerts/dispatch', async (req, res) => {
     return res.json({ data: result });
   } catch (error) {
     return res.status(500).json({ error: error.message });
+  }
+});
+
+router.post('/slo/evaluate', async (_req, res) => {
+  try {
+    const result = await evaluateSloPolicies();
+    res.json({ data: result });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 

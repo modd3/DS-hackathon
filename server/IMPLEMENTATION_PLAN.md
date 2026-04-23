@@ -99,4 +99,6 @@ Each endpoint should:
 - ✅ OpenTelemetry SDK added with OTLP trace + metric exporters.
 - ✅ Tracing spans added across webhook intake, ingestion persistence, SLA evaluation, and alert dispatch workflows.
 - ✅ Prometheus-style metrics remain available while OTLP metrics can now be shipped to managed dashboards.
-- ⏭️ Next: add distributed trace context propagation into outbound integrations and dashboard SLO alert policies.
+- ✅ Distributed trace context propagation added from webhook ingestion to asynchronous consumer processing.
+- ✅ SLO policy evaluator added with threshold-based alerts for queue depth, DLQ growth, broker health, and failed alert volume.
+- ⏭️ Next: propagate trace context into external notification providers and configure managed dashboard alert rules from exported OTLP metrics.

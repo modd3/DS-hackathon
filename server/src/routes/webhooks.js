@@ -1,5 +1,5 @@
 const express = require('express');
-const { trace, SpanStatusCode } = require('@opentelemetry/api');
+const { trace, SpanStatusCode, context, propagation } = require('@opentelemetry/api');
 const { mapIncomingEvent } = require('../services/eventMapper');
 const { verifyWebhookAuth } = require('../middleware/verifyWebhookAuth');
 const { enqueueNormalizedEvent } = require('../lib/eventBus');
@@ -15,7 +15,9 @@ function buildWebhookHandler(source) {
 
     try {
       const normalized = mapIncomingEvent({ source, body: req.body });
-      const queued = await enqueueNormalizedEvent(normalized);
+      const carrier = {};
+      propagation.inject(context.active(), carrier);
+      const queued = await enqueueNormalizedEvent(normalized, { traceContext: carrier });
       span.setAttribute('queue.id', queued.id);
       span.setAttribute('event.type', normalized.event.type);
       span.setStatus({ code: SpanStatusCode.OK });
