@@ -96,4 +96,7 @@ Each endpoint should:
 - ✅ Internal broker metrics endpoint support added for queue/group observability.
 - ✅ Added Prometheus-style metrics endpoint (`/metrics`) for broker queue/dead-letter/health gauges.
 - ✅ Added broker health probe + periodic health alert logging from server scheduler and internal health endpoint.
-- ⏭️ Next: integrate OpenTelemetry tracing for webhook->ingest->SLA->alert spans and ship metrics to managed dashboards.
+- ✅ OpenTelemetry SDK added with OTLP trace + metric exporters.
+- ✅ Tracing spans added across webhook intake, ingestion persistence, SLA evaluation, and alert dispatch workflows.
+- ✅ Prometheus-style metrics remain available while OTLP metrics can now be shipped to managed dashboards.
+- ⏭️ Next: add distributed trace context propagation into outbound integrations and dashboard SLO alert policies.

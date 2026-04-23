@@ -1,10 +1,21 @@
 const { Prisma, prisma } = require('../lib/prisma');
+const { trace, SpanStatusCode } = require('@opentelemetry/api');
+const tracer = trace.getTracer('dayliff.ingestion');
 
 async function persistNormalizedEvent(normalized) {
+  const span = tracer.startSpan('ingestion.persist', {
+    attributes: {
+      source: normalized.source,
+      source_event_id: normalized.sourceEventId,
+      event_type: normalized.event.type
+    }
+  });
+
   const fallbackCustomerCode = `auto:${normalized.customer.email || normalized.customer.fullName}`;
   const resolvedCustomerCode = normalized.customer.customerCode || fallbackCustomerCode;
 
-  return prisma.$transaction(async (tx) => {
+  try {
+    const result = await prisma.$transaction(async (tx) => {
     const customer = await tx.customer.upsert({
       where: {
         customerCode: resolvedCustomerCode
@@ -122,6 +133,18 @@ async function persistNormalizedEvent(normalized) {
       wasDuplicateEvent: !isNewEventInsert
     };
   });
+
+    span.setAttribute('journey.id', result.journeyId);
+    span.setAttribute('duplicate_event', result.wasDuplicateEvent);
+    span.setStatus({ code: SpanStatusCode.OK });
+    return result;
+  } catch (error) {
+    span.recordException(error);
+    span.setStatus({ code: SpanStatusCode.ERROR, message: error.message });
+    throw error;
+  } finally {
+    span.end();
+  }
 }
 
 module.exports = {
