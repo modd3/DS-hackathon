@@ -77,3 +77,11 @@ Each endpoint should:
 3. Pause long enough to trigger SLA breach.
 4. Show alert on dashboard and breach in journey detail.
 5. Complete delivery event and show closed lifecycle.
+
+## 7) Implementation Progress (Current)
+
+- ✅ Webhook ingestion routes scaffolded for CRM/Engineering/ERP.
+- ✅ Canonical event mapping + schema validation implemented.
+- ✅ Journey timeline and current-status APIs implemented.
+- ✅ SLA evaluation worker implemented with breach + alert record creation.
+- ⏭️ Next: integrate queue transport (RabbitMQ/Redis Streams) between ingest and persistence.
