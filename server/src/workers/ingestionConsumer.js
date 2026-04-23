@@ -8,7 +8,8 @@ function startIngestionConsumer() {
     console.log('[ingestion-consumer] processed', {
       queueId: message.id,
       journeyId: result.journeyId,
-      eventId: result.eventId
+      eventId: result.eventId,
+      wasDuplicateEvent: result.wasDuplicateEvent
     });
   });
 }

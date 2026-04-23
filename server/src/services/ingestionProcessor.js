@@ -41,29 +41,42 @@ async function persistNormalizedEvent(normalized) {
       }
     });
 
-    const event = await tx.journeyEvent.upsert({
+    const existingEvent = await tx.journeyEvent.findUnique({
       where: {
         source_sourceEventId: {
           source: normalized.source,
           sourceEventId: normalized.sourceEventId
         }
-      },
-      create: {
-        journeyId: journey.id,
-        stage: normalized.event.stage,
-        eventType: normalized.event.type,
-        source: normalized.source,
-        sourceEventId: normalized.sourceEventId,
-        sourceSystem: normalized.sourceSystem,
-        occurredAt: normalized.event.occurredAt,
-        actorUserId: normalized.event.actorUserId,
-        actorName: normalized.event.actorName,
-        payload: normalized.payload
-      },
-      update: {}
+      }
     });
 
-    if (normalized.event.stage && normalized.event.type === 'STAGE_ENTERED') {
+    let event = existingEvent;
+    let isNewEventInsert = false;
+
+    if (!existingEvent) {
+      event = await tx.journeyEvent.create({
+        data: {
+          journeyId: journey.id,
+          stage: normalized.event.stage,
+          eventType: normalized.event.type,
+          source: normalized.source,
+          sourceEventId: normalized.sourceEventId,
+          sourceSystem: normalized.sourceSystem,
+          occurredAt: normalized.event.occurredAt,
+          actorUserId: normalized.event.actorUserId,
+          actorName: normalized.event.actorName,
+          payload: normalized.payload
+        }
+      });
+
+      isNewEventInsert = true;
+    }
+
+    if (
+      isNewEventInsert
+      && normalized.event.stage
+      && normalized.event.type === 'STAGE_ENTERED'
+    ) {
       const count = await tx.journeyStage.count({ where: { journeyId: journey.id } });
 
       await tx.journeyStage.updateMany({
@@ -88,14 +101,18 @@ async function persistNormalizedEvent(normalized) {
       });
     }
 
-    if (normalized.event.type === 'DELIVERY_CONFIRMED') {
+    if (isNewEventInsert && normalized.event.type === 'DELIVERY_CONFIRMED') {
       await tx.journey.update({
         where: { id: journey.id },
         data: { status: 'COMPLETED', closedAt: normalized.event.occurredAt, currentStage: 'DELIVERY' }
       });
     }
 
-    return { journeyId: journey.id, eventId: event.id };
+    return {
+      journeyId: journey.id,
+      eventId: event.id,
+      wasDuplicateEvent: !isNewEventInsert
+    };
   });
 }
 

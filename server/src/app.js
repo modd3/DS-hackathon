@@ -1,6 +1,7 @@
 const express = require('express');
 const { webhooksRouter } = require('./routes/webhooks');
 const { journeysRouter } = require('./routes/journeys');
+const { internalRouter } = require('./routes/internal');
 const { evaluateSlaBreaches } = require('./workers/slaWorker');
 
 const app = express();
@@ -13,6 +14,7 @@ app.get('/health', (_req, res) => {
 
 app.use('/api/webhooks', webhooksRouter);
 app.use('/api/journeys', journeysRouter);
+app.use('/api/internal', internalRouter);
 
 app.post('/api/internal/sla/evaluate', async (_req, res) => {
   try {

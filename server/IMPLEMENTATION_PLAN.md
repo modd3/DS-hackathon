@@ -85,4 +85,5 @@ Each endpoint should:
 - ✅ Journey timeline and current-status APIs implemented.
 - ✅ SLA evaluation worker implemented with breach + alert record creation.
 - ✅ Queue decoupling implemented with an in-process event bus abstraction (ready to swap with RabbitMQ/Redis Streams).
-- ⏭️ Next: replace in-process bus with external durable broker + dead-letter queue.
+- ✅ Dead-letter queue handling added to in-process bus with retries and requeue support.
+- ⏭️ Next: replace in-process bus with external durable broker (RabbitMQ/Redis Streams) and persistent DLQ storage.
