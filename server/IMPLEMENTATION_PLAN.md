@@ -94,4 +94,6 @@ Each endpoint should:
 - ✅ Added external broker adapter option: `redis-streams` using Upstash Redis REST (free-tier friendly for demo/dev).
 - ✅ Redis Streams consumer-group mode added (`XGROUP`, `XREADGROUP`, `XACK`) with reclaim loop via `XAUTOCLAIM`.
 - ✅ Internal broker metrics endpoint support added for queue/group observability.
-- ⏭️ Next: add Prometheus/OpenTelemetry metrics export and provider health alerts.
+- ✅ Added Prometheus-style metrics endpoint (`/metrics`) for broker queue/dead-letter/health gauges.
+- ✅ Added broker health probe + periodic health alert logging from server scheduler and internal health endpoint.
+- ⏭️ Next: integrate OpenTelemetry tracing for webhook->ingest->SLA->alert spans and ship metrics to managed dashboards.

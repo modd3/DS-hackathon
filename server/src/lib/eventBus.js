@@ -338,6 +338,47 @@ async function getBrokerMetrics() {
   };
 }
 
+async function getBrokerHealth() {
+  const issues = [];
+
+  if (BROKER_PROVIDER === 'redis-streams') {
+    if (!UPSTASH_REDIS_REST_URL || !UPSTASH_REDIS_REST_TOKEN) {
+      issues.push('Missing Upstash Redis credentials.');
+      return { status: 'down', provider: BROKER_PROVIDER, issues };
+    }
+
+    try {
+      const pending = await redisCommand('XPENDING', [REDIS_STREAM_KEY, REDIS_CONSUMER_GROUP]);
+      const pendingCount = Number(pending?.[0] || 0);
+
+      if (pendingCount > 100) {
+        issues.push(`High pending message count: ${pendingCount}`);
+      }
+    } catch (error) {
+      issues.push(`Redis health probe failed: ${error.message}`);
+    }
+  } else {
+    const usageRatio = state.queue.length / Math.max(1, MAX_QUEUE_SIZE);
+    if (usageRatio > 0.8) {
+      issues.push(`Queue usage above 80% (${Math.round(usageRatio * 100)}%).`);
+    }
+
+    try {
+      if (BROKER_PROVIDER === 'file-state') {
+        fs.accessSync(BROKER_STATE_FILE, fs.constants.W_OK);
+      }
+    } catch (error) {
+      issues.push(`Broker state file not writable: ${error.message}`);
+    }
+  }
+
+  return {
+    status: issues.length > 0 ? 'degraded' : 'healthy',
+    provider: BROKER_PROVIDER,
+    issues
+  };
+}
+
 async function getQueueStats() {
   if (BROKER_PROVIDER === 'redis-streams') {
     const queued = Number(await redisCommand('XLEN', [REDIS_STREAM_KEY]));
@@ -435,6 +476,7 @@ module.exports = {
   startEventConsumer,
   getQueueStats,
   getBrokerMetrics,
+  getBrokerHealth,
   listDeadLetters,
   requeueDeadLetter
 };

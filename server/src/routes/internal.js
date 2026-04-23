@@ -1,5 +1,5 @@
 const express = require('express');
-const { getQueueStats, getBrokerMetrics, listDeadLetters, requeueDeadLetter } = require('../lib/eventBus');
+const { getQueueStats, getBrokerMetrics, getBrokerHealth, listDeadLetters, requeueDeadLetter } = require('../lib/eventBus');
 const { verifyWebhookAuth } = require('../middleware/verifyWebhookAuth');
 const { dispatchPendingAlerts } = require('../workers/alertDeliveryWorker');
 
@@ -21,6 +21,15 @@ router.get('/queue/metrics', async (_req, res) => {
   try {
     const metrics = await getBrokerMetrics();
     res.json({ data: metrics });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.get('/queue/health', async (_req, res) => {
+  try {
+    const health = await getBrokerHealth();
+    res.json({ data: health });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

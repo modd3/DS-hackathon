@@ -3,6 +3,7 @@ const { webhooksRouter } = require('./routes/webhooks');
 const { journeysRouter } = require('./routes/journeys');
 const { internalRouter } = require('./routes/internal');
 const { evaluateSlaBreaches } = require('./workers/slaWorker');
+const { renderPrometheusMetrics } = require('./services/metricsService');
 
 const app = express();
 
@@ -10,6 +11,16 @@ app.use(express.json({ limit: '1mb' }));
 
 app.get('/health', (_req, res) => {
   res.json({ ok: true, service: 'dayliff-1000-eyes-server' });
+});
+
+app.get('/metrics', async (_req, res) => {
+  try {
+    const metrics = await renderPrometheusMetrics();
+    res.set('Content-Type', 'text/plain; version=0.0.4');
+    res.send(metrics);
+  } catch (error) {
+    res.status(500).send(`# metrics_error ${error.message}`);
+  }
 });
 
 app.use('/api/webhooks', webhooksRouter);
