@@ -1,6 +1,7 @@
 const express = require('express');
 const { getQueueStats, listDeadLetters, requeueDeadLetter } = require('../lib/eventBus');
 const { verifyWebhookAuth } = require('../middleware/verifyWebhookAuth');
+const { dispatchPendingAlerts } = require('../workers/alertDeliveryWorker');
 
 const router = express.Router();
 
@@ -23,6 +24,17 @@ router.post('/queue/dead-letters/:messageId/requeue', (req, res) => {
   }
 
   return res.json({ data: message });
+});
+
+router.post('/alerts/dispatch', async (req, res) => {
+  const { limit = 100 } = req.body || {};
+
+  try {
+    const result = await dispatchPendingAlerts(Number(limit));
+    return res.json({ data: result });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
 });
 
 module.exports = { internalRouter: router };

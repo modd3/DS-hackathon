@@ -18,6 +18,14 @@ function buildWebhookHandler(source) {
         enqueuedAt: queued.enqueuedAt
       });
     } catch (error) {
+      if (error.code === 'QUEUE_FULL') {
+        return res.status(503).json({
+          accepted: false,
+          source,
+          error: error.message
+        });
+      }
+
       return res.status(400).json({
         accepted: false,
         source,

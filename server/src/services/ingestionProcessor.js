@@ -1,4 +1,4 @@
-const { prisma } = require('../lib/prisma');
+const { Prisma, prisma } = require('../lib/prisma');
 
 async function persistNormalizedEvent(normalized) {
   const fallbackCustomerCode = `auto:${normalized.customer.email || normalized.customer.fullName}`;
@@ -41,35 +41,43 @@ async function persistNormalizedEvent(normalized) {
       }
     });
 
-    const existingEvent = await tx.journeyEvent.findUnique({
-      where: {
-        source_sourceEventId: {
-          source: normalized.source,
-          sourceEventId: normalized.sourceEventId
-        }
+    const eventWhere = {
+      source_sourceEventId: {
+        source: normalized.source,
+        sourceEventId: normalized.sourceEventId
       }
-    });
+    };
+
+    const existingEvent = await tx.journeyEvent.findUnique({ where: eventWhere });
 
     let event = existingEvent;
     let isNewEventInsert = false;
 
     if (!existingEvent) {
-      event = await tx.journeyEvent.create({
-        data: {
-          journeyId: journey.id,
-          stage: normalized.event.stage,
-          eventType: normalized.event.type,
-          source: normalized.source,
-          sourceEventId: normalized.sourceEventId,
-          sourceSystem: normalized.sourceSystem,
-          occurredAt: normalized.event.occurredAt,
-          actorUserId: normalized.event.actorUserId,
-          actorName: normalized.event.actorName,
-          payload: normalized.payload
-        }
-      });
+      try {
+        event = await tx.journeyEvent.create({
+          data: {
+            journeyId: journey.id,
+            stage: normalized.event.stage,
+            eventType: normalized.event.type,
+            source: normalized.source,
+            sourceEventId: normalized.sourceEventId,
+            sourceSystem: normalized.sourceSystem,
+            occurredAt: normalized.event.occurredAt,
+            actorUserId: normalized.event.actorUserId,
+            actorName: normalized.event.actorName,
+            payload: normalized.payload
+          }
+        });
 
-      isNewEventInsert = true;
+        isNewEventInsert = true;
+      } catch (error) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+          event = await tx.journeyEvent.findUnique({ where: eventWhere });
+        } else {
+          throw error;
+        }
+      }
     }
 
     if (

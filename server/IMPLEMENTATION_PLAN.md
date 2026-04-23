@@ -89,4 +89,6 @@ Each endpoint should:
 - ✅ SLA scheduler enabled from server bootstrap for periodic breach checks.
 - ✅ Internal queue routes protected with auth token middleware.
 - 📝 Note: `journey.currentStage` is only advanced on stage-bearing events; non-stage updates intentionally do not clear it.
-- ⏭️ Next: replace in-process bus with external durable broker (RabbitMQ/Redis Streams), add persistent DLQ storage, and implement alert delivery worker.
+- ✅ Alert delivery worker added with scheduled dispatch loop and manual internal trigger endpoint.
+- ✅ In-process DLQ now appends records to file-backed log for persistence across restarts.
+- ⏭️ Next: replace in-process bus with external durable broker (RabbitMQ/Redis Streams) and move queue/DLQ state to broker-native durable storage.

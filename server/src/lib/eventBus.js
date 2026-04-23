@@ -1,9 +1,12 @@
 const EventEmitter = require('events');
+const fs = require('fs');
 
 const emitter = new EventEmitter();
 const queue = [];
 const deadLetters = [];
 const MAX_ATTEMPTS = 3;
+const MAX_QUEUE_SIZE = Number(process.env.QUEUE_MAX_SIZE || 10000);
+const DEAD_LETTER_FILE = process.env.DEAD_LETTER_FILE || 'server/.dead-letters.log';
 let workerAttached = false;
 let inFlight = false;
 
@@ -12,6 +15,12 @@ function createQueueId() {
 }
 
 function enqueueNormalizedEvent(normalized) {
+  if (queue.length >= MAX_QUEUE_SIZE) {
+    const error = new Error('In-memory queue capacity reached.');
+    error.code = 'QUEUE_FULL';
+    throw error;
+  }
+
   const message = {
     id: createQueueId(),
     enqueuedAt: new Date(),
@@ -25,12 +34,23 @@ function enqueueNormalizedEvent(normalized) {
   return message;
 }
 
+function persistDeadLetter(deadLetter) {
+  try {
+    fs.appendFileSync(DEAD_LETTER_FILE, `${JSON.stringify(deadLetter)}\n`);
+  } catch (error) {
+    console.error('[event-bus] failed to persist dead letter', error.message);
+  }
+}
+
 function moveToDeadLetter(message, reason) {
-  deadLetters.push({
+  const deadLetter = {
     ...message,
     failedAt: new Date(),
     reason
-  });
+  };
+
+  deadLetters.push(deadLetter);
+  persistDeadLetter(deadLetter);
 }
 
 function processNext(handler) {
@@ -88,7 +108,9 @@ function getQueueStats() {
     queued: queue.length,
     deadLetters: deadLetters.length,
     inFlight,
-    maxAttempts: MAX_ATTEMPTS
+    maxAttempts: MAX_ATTEMPTS,
+    maxQueueSize: MAX_QUEUE_SIZE,
+    deadLetterFile: DEAD_LETTER_FILE
   };
 }
 
