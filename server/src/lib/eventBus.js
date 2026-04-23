@@ -6,6 +6,12 @@ const MAX_ATTEMPTS = 3;
 const MAX_QUEUE_SIZE = Number(process.env.QUEUE_MAX_SIZE || 10000);
 const BROKER_PROVIDER = process.env.BROKER_PROVIDER || 'file-state';
 const BROKER_STATE_FILE = process.env.BROKER_STATE_FILE || 'server/.broker-state.json';
+const BROKER_POLL_MS = Number(process.env.BROKER_POLL_MS || 1000);
+
+const REDIS_STREAM_KEY = process.env.REDIS_STREAM_KEY || 'dayliff:events';
+const REDIS_DLQ_STREAM_KEY = process.env.REDIS_DLQ_STREAM_KEY || 'dayliff:events:dlq';
+const UPSTASH_REDIS_REST_URL = process.env.UPSTASH_REDIS_REST_URL;
+const UPSTASH_REDIS_REST_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
 
 const state = {
   queue: [],
@@ -14,6 +20,8 @@ const state = {
 
 let workerAttached = false;
 let inFlight = false;
+let redisLastId = '0-0';
+let pollTimer = null;
 
 function hydrateStateFromDisk() {
   if (BROKER_PROVIDER !== 'file-state') return;
@@ -48,7 +56,47 @@ function createQueueId() {
   return `evt_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
 }
 
-function enqueueNormalizedEvent(normalized) {
+async function redisCommand(command, args = []) {
+  if (!UPSTASH_REDIS_REST_URL || !UPSTASH_REDIS_REST_TOKEN) {
+    throw new Error('Missing Upstash Redis credentials for redis-streams provider.');
+  }
+
+  const response = await fetch(`${UPSTASH_REDIS_REST_URL}/${command}/${args.map((arg) => encodeURIComponent(String(arg))).join('/')}`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${UPSTASH_REDIS_REST_TOKEN}`
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error(`Redis command failed: ${command}`);
+  }
+
+  const data = await response.json();
+  if (data.error) {
+    throw new Error(`Redis error: ${data.error}`);
+  }
+
+  return data.result;
+}
+
+function encodeMessage(normalized, attempts = 0, reason = null) {
+  return {
+    payload: JSON.stringify(normalized),
+    attempts: String(attempts),
+    reason: reason || ''
+  };
+}
+
+function decodeFields(fieldArray) {
+  const mapped = {};
+  for (let i = 0; i < fieldArray.length; i += 2) {
+    mapped[fieldArray[i]] = fieldArray[i + 1];
+  }
+  return mapped;
+}
+
+async function enqueueFileState(normalized) {
   if (state.queue.length >= MAX_QUEUE_SIZE) {
     const error = new Error('Queue capacity reached.');
     error.code = 'QUEUE_FULL';
@@ -69,7 +117,27 @@ function enqueueNormalizedEvent(normalized) {
   return message;
 }
 
-function moveToDeadLetter(message, reason) {
+async function enqueueRedisStreams(normalized) {
+  const fields = encodeMessage(normalized, 0);
+  const id = await redisCommand('XADD', [REDIS_STREAM_KEY, '*', 'payload', fields.payload, 'attempts', fields.attempts, 'reason', fields.reason]);
+
+  return {
+    id,
+    enqueuedAt: new Date().toISOString(),
+    attempts: 0,
+    normalized
+  };
+}
+
+async function enqueueNormalizedEvent(normalized) {
+  if (BROKER_PROVIDER === 'redis-streams') {
+    return enqueueRedisStreams(normalized);
+  }
+
+  return enqueueFileState(normalized);
+}
+
+function moveToDeadLetterFileState(message, reason) {
   const deadLetter = {
     ...message,
     failedAt: new Date().toISOString(),
@@ -80,7 +148,12 @@ function moveToDeadLetter(message, reason) {
   persistStateToDisk();
 }
 
-function processNext(handler) {
+async function moveToDeadLetterRedis(message, reason) {
+  const fields = encodeMessage(message.normalized, message.attempts, reason);
+  await redisCommand('XADD', [REDIS_DLQ_STREAM_KEY, '*', 'payload', fields.payload, 'attempts', fields.attempts, 'reason', fields.reason]);
+}
+
+function processNextFileState(handler) {
   if (inFlight) return;
 
   const message = state.queue.shift();
@@ -98,7 +171,7 @@ function processNext(handler) {
       };
 
       if (attempts >= MAX_ATTEMPTS) {
-        moveToDeadLetter(retriableMessage, error.message);
+        moveToDeadLetterFileState(retriableMessage, error.message);
       } else {
         setTimeout(() => {
           state.queue.push(retriableMessage);
@@ -117,9 +190,60 @@ function processNext(handler) {
       inFlight = false;
 
       if (state.queue.length > 0) {
-        setImmediate(() => processNext(handler));
+        setImmediate(() => processNextFileState(handler));
       }
     });
+}
+
+async function processNextRedisStreams(handler) {
+  if (inFlight) return;
+  inFlight = true;
+
+  try {
+    const streamData = await redisCommand('XREAD', ['COUNT', '1', 'STREAMS', REDIS_STREAM_KEY, redisLastId]);
+
+    if (!streamData || streamData.length === 0) {
+      return;
+    }
+
+    const [, entries] = streamData[0];
+    if (!entries || entries.length === 0) {
+      return;
+    }
+
+    const [entryId, fieldArray] = entries[0];
+    redisLastId = entryId;
+
+    const fields = decodeFields(fieldArray);
+    const attempts = Number(fields.attempts || 0);
+    const normalized = JSON.parse(fields.payload);
+
+    try {
+      await handler({
+        id: entryId,
+        attempts,
+        normalized
+      });
+    } catch (error) {
+      const nextAttempts = attempts + 1;
+      if (nextAttempts >= MAX_ATTEMPTS) {
+        await moveToDeadLetterRedis({ normalized, attempts: nextAttempts }, error.message);
+      } else {
+        const retryFields = encodeMessage(normalized, nextAttempts, error.message);
+        await redisCommand('XADD', [REDIS_STREAM_KEY, '*', 'payload', retryFields.payload, 'attempts', retryFields.attempts, 'reason', retryFields.reason]);
+      }
+
+      console.error('[event-bus][redis] failed to process message', {
+        queueId: entryId,
+        attempts: nextAttempts,
+        error: error.message
+      });
+    }
+  } catch (error) {
+    console.error('[event-bus][redis] poll failed', error.message);
+  } finally {
+    inFlight = false;
+  }
 }
 
 function startEventConsumer(handler) {
@@ -127,8 +251,16 @@ function startEventConsumer(handler) {
 
   workerAttached = true;
 
+  if (BROKER_PROVIDER === 'redis-streams') {
+    pollTimer = setInterval(() => {
+      processNextRedisStreams(handler);
+    }, BROKER_POLL_MS);
+
+    return;
+  }
+
   emitter.on('queue:message', () => {
-    processNext(handler);
+    processNextFileState(handler);
   });
 
   if (state.queue.length > 0) {
@@ -136,7 +268,22 @@ function startEventConsumer(handler) {
   }
 }
 
-function getQueueStats() {
+async function getQueueStats() {
+  if (BROKER_PROVIDER === 'redis-streams') {
+    const queued = Number(await redisCommand('XLEN', [REDIS_STREAM_KEY]));
+    const deadLetters = Number(await redisCommand('XLEN', [REDIS_DLQ_STREAM_KEY]));
+
+    return {
+      provider: BROKER_PROVIDER,
+      queued,
+      deadLetters,
+      inFlight,
+      maxAttempts: MAX_ATTEMPTS,
+      streamKey: REDIS_STREAM_KEY,
+      deadLetterStreamKey: REDIS_DLQ_STREAM_KEY
+    };
+  }
+
   return {
     provider: BROKER_PROVIDER,
     queued: state.queue.length,
@@ -148,11 +295,44 @@ function getQueueStats() {
   };
 }
 
-function listDeadLetters(limit = 50) {
+async function listDeadLetters(limit = 50) {
+  if (BROKER_PROVIDER === 'redis-streams') {
+    const result = await redisCommand('XREVRANGE', [REDIS_DLQ_STREAM_KEY, '+', '-', 'COUNT', Number(limit)]);
+    return result.map(([id, fields]) => {
+      const mapped = decodeFields(fields);
+      return {
+        id,
+        attempts: Number(mapped.attempts || 0),
+        reason: mapped.reason || '',
+        normalized: JSON.parse(mapped.payload)
+      };
+    });
+  }
+
   return state.deadLetters.slice(-Math.max(1, Number(limit)));
 }
 
-function requeueDeadLetter(messageId) {
+async function requeueDeadLetter(messageId) {
+  if (BROKER_PROVIDER === 'redis-streams') {
+    const result = await redisCommand('XRANGE', [REDIS_DLQ_STREAM_KEY, messageId, messageId, 'COUNT', '1']);
+    if (!result || result.length === 0) return null;
+
+    const [id, fields] = result[0];
+    const mapped = decodeFields(fields);
+    const normalized = JSON.parse(mapped.payload);
+
+    const retryFields = encodeMessage(normalized, 0);
+    const newId = await redisCommand('XADD', [REDIS_STREAM_KEY, '*', 'payload', retryFields.payload, 'attempts', retryFields.attempts, 'reason', retryFields.reason]);
+    await redisCommand('XDEL', [REDIS_DLQ_STREAM_KEY, id]);
+
+    return {
+      id: newId,
+      enqueuedAt: new Date().toISOString(),
+      attempts: 0,
+      normalized
+    };
+  }
+
   const index = state.deadLetters.findIndex((item) => item.id === messageId);
   if (index === -1) return null;
 

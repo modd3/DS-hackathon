@@ -91,4 +91,5 @@ Each endpoint should:
 - 📝 Note: `journey.currentStage` is only advanced on stage-bearing events; non-stage updates intentionally do not clear it.
 - ✅ Alert delivery worker added with scheduled dispatch loop and manual internal trigger endpoint.
 - ✅ Queue + DLQ state are now persisted in a file-backed broker state store for restart recovery.
-- ⏭️ Next: replace file-state broker with external broker adapter (RabbitMQ/Redis Streams) and implement producer/consumer adapters.
+- ✅ Added external broker adapter option: `redis-streams` using Upstash Redis REST (free-tier friendly for demo/dev).
+- ⏭️ Next: add Redis consumer-group semantics, ack/reclaim strategy, and structured broker metrics dashboards.

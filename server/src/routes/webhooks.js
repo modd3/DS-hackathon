@@ -9,7 +9,7 @@ function buildWebhookHandler(source) {
   return async (req, res) => {
     try {
       const normalized = mapIncomingEvent({ source, body: req.body });
-      const queued = enqueueNormalizedEvent(normalized);
+      const queued = await enqueueNormalizedEvent(normalized);
 
       return res.status(202).json({
         accepted: true,
