@@ -17,13 +17,21 @@ router.get('/queue/dead-letters', (req, res) => {
 });
 
 router.post('/queue/dead-letters/:messageId/requeue', (req, res) => {
-  const message = requeueDeadLetter(req.params.messageId);
+  try {
+    const message = requeueDeadLetter(req.params.messageId);
 
-  if (!message) {
-    return res.status(404).json({ error: 'Dead letter not found.' });
+    if (!message) {
+      return res.status(404).json({ error: 'Dead letter not found.' });
+    }
+
+    return res.json({ data: message });
+  } catch (error) {
+    if (error.code === 'QUEUE_FULL') {
+      return res.status(503).json({ error: error.message });
+    }
+
+    return res.status(500).json({ error: error.message });
   }
-
-  return res.json({ data: message });
 });
 
 router.post('/alerts/dispatch', async (req, res) => {

@@ -90,5 +90,5 @@ Each endpoint should:
 - ✅ Internal queue routes protected with auth token middleware.
 - 📝 Note: `journey.currentStage` is only advanced on stage-bearing events; non-stage updates intentionally do not clear it.
 - ✅ Alert delivery worker added with scheduled dispatch loop and manual internal trigger endpoint.
-- ✅ In-process DLQ now appends records to file-backed log for persistence across restarts.
-- ⏭️ Next: replace in-process bus with external durable broker (RabbitMQ/Redis Streams) and move queue/DLQ state to broker-native durable storage.
+- ✅ Queue + DLQ state are now persisted in a file-backed broker state store for restart recovery.
+- ⏭️ Next: replace file-state broker with external broker adapter (RabbitMQ/Redis Streams) and implement producer/consumer adapters.
