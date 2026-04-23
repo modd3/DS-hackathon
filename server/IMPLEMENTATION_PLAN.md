@@ -92,4 +92,6 @@ Each endpoint should:
 - ✅ Alert delivery worker added with scheduled dispatch loop and manual internal trigger endpoint.
 - ✅ Queue + DLQ state are now persisted in a file-backed broker state store for restart recovery.
 - ✅ Added external broker adapter option: `redis-streams` using Upstash Redis REST (free-tier friendly for demo/dev).
-- ⏭️ Next: add Redis consumer-group semantics, ack/reclaim strategy, and structured broker metrics dashboards.
+- ✅ Redis Streams consumer-group mode added (`XGROUP`, `XREADGROUP`, `XACK`) with reclaim loop via `XAUTOCLAIM`.
+- ✅ Internal broker metrics endpoint support added for queue/group observability.
+- ⏭️ Next: add Prometheus/OpenTelemetry metrics export and provider health alerts.

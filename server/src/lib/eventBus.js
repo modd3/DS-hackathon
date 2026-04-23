@@ -7,9 +7,12 @@ const MAX_QUEUE_SIZE = Number(process.env.QUEUE_MAX_SIZE || 10000);
 const BROKER_PROVIDER = process.env.BROKER_PROVIDER || 'file-state';
 const BROKER_STATE_FILE = process.env.BROKER_STATE_FILE || 'server/.broker-state.json';
 const BROKER_POLL_MS = Number(process.env.BROKER_POLL_MS || 1000);
+const BROKER_RECLAIM_MS = Number(process.env.BROKER_RECLAIM_MS || 30000);
 
 const REDIS_STREAM_KEY = process.env.REDIS_STREAM_KEY || 'dayliff:events';
 const REDIS_DLQ_STREAM_KEY = process.env.REDIS_DLQ_STREAM_KEY || 'dayliff:events:dlq';
+const REDIS_CONSUMER_GROUP = process.env.REDIS_CONSUMER_GROUP || 'dayliff_ingestion';
+const REDIS_CONSUMER_NAME = process.env.REDIS_CONSUMER_NAME || 'worker_1';
 const UPSTASH_REDIS_REST_URL = process.env.UPSTASH_REDIS_REST_URL;
 const UPSTASH_REDIS_REST_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
 
@@ -20,8 +23,8 @@ const state = {
 
 let workerAttached = false;
 let inFlight = false;
-let redisLastId = '0-0';
 let pollTimer = null;
+let reclaimTimer = null;
 
 function hydrateStateFromDisk() {
   if (BROKER_PROVIDER !== 'file-state') return;
@@ -94,6 +97,16 @@ function decodeFields(fieldArray) {
     mapped[fieldArray[i]] = fieldArray[i + 1];
   }
   return mapped;
+}
+
+async function ensureRedisConsumerGroup() {
+  try {
+    await redisCommand('XGROUP', ['CREATE', REDIS_STREAM_KEY, REDIS_CONSUMER_GROUP, '$', 'MKSTREAM']);
+  } catch (error) {
+    if (!error.message.includes('BUSYGROUP')) {
+      throw error;
+    }
+  }
 }
 
 async function enqueueFileState(normalized) {
@@ -195,12 +208,45 @@ function processNextFileState(handler) {
     });
 }
 
+async function processRedisEntry(handler, entryId, fieldArray) {
+  const fields = decodeFields(fieldArray);
+  const attempts = Number(fields.attempts || 0);
+  const normalized = JSON.parse(fields.payload);
+
+  try {
+    await handler({
+      id: entryId,
+      attempts,
+      normalized
+    });
+
+    await redisCommand('XACK', [REDIS_STREAM_KEY, REDIS_CONSUMER_GROUP, entryId]);
+  } catch (error) {
+    const nextAttempts = attempts + 1;
+
+    if (nextAttempts >= MAX_ATTEMPTS) {
+      await moveToDeadLetterRedis({ normalized, attempts: nextAttempts }, error.message);
+    } else {
+      const retryFields = encodeMessage(normalized, nextAttempts, error.message);
+      await redisCommand('XADD', [REDIS_STREAM_KEY, '*', 'payload', retryFields.payload, 'attempts', retryFields.attempts, 'reason', retryFields.reason]);
+    }
+
+    await redisCommand('XACK', [REDIS_STREAM_KEY, REDIS_CONSUMER_GROUP, entryId]);
+
+    console.error('[event-bus][redis] failed to process message', {
+      queueId: entryId,
+      attempts: nextAttempts,
+      error: error.message
+    });
+  }
+}
+
 async function processNextRedisStreams(handler) {
   if (inFlight) return;
   inFlight = true;
 
   try {
-    const streamData = await redisCommand('XREAD', ['COUNT', '1', 'STREAMS', REDIS_STREAM_KEY, redisLastId]);
+    const streamData = await redisCommand('XREADGROUP', ['GROUP', REDIS_CONSUMER_GROUP, REDIS_CONSUMER_NAME, 'COUNT', '10', 'STREAMS', REDIS_STREAM_KEY, '>']);
 
     if (!streamData || streamData.length === 0) {
       return;
@@ -211,38 +257,27 @@ async function processNextRedisStreams(handler) {
       return;
     }
 
-    const [entryId, fieldArray] = entries[0];
-    redisLastId = entryId;
-
-    const fields = decodeFields(fieldArray);
-    const attempts = Number(fields.attempts || 0);
-    const normalized = JSON.parse(fields.payload);
-
-    try {
-      await handler({
-        id: entryId,
-        attempts,
-        normalized
-      });
-    } catch (error) {
-      const nextAttempts = attempts + 1;
-      if (nextAttempts >= MAX_ATTEMPTS) {
-        await moveToDeadLetterRedis({ normalized, attempts: nextAttempts }, error.message);
-      } else {
-        const retryFields = encodeMessage(normalized, nextAttempts, error.message);
-        await redisCommand('XADD', [REDIS_STREAM_KEY, '*', 'payload', retryFields.payload, 'attempts', retryFields.attempts, 'reason', retryFields.reason]);
-      }
-
-      console.error('[event-bus][redis] failed to process message', {
-        queueId: entryId,
-        attempts: nextAttempts,
-        error: error.message
-      });
+    for (const [entryId, fieldArray] of entries) {
+      await processRedisEntry(handler, entryId, fieldArray);
     }
   } catch (error) {
     console.error('[event-bus][redis] poll failed', error.message);
   } finally {
     inFlight = false;
+  }
+}
+
+async function reclaimPendingRedisEntries(handler) {
+  try {
+    const claimed = await redisCommand('XAUTOCLAIM', [REDIS_STREAM_KEY, REDIS_CONSUMER_GROUP, REDIS_CONSUMER_NAME, '60000', '0-0', 'COUNT', '10']);
+    if (!claimed || claimed.length < 2) return;
+
+    const entries = claimed[1] || [];
+    for (const [entryId, fieldArray] of entries) {
+      await processRedisEntry(handler, entryId, fieldArray);
+    }
+  } catch (error) {
+    console.error('[event-bus][redis] reclaim failed', error.message);
   }
 }
 
@@ -252,9 +287,19 @@ function startEventConsumer(handler) {
   workerAttached = true;
 
   if (BROKER_PROVIDER === 'redis-streams') {
-    pollTimer = setInterval(() => {
-      processNextRedisStreams(handler);
-    }, BROKER_POLL_MS);
+    ensureRedisConsumerGroup()
+      .then(() => {
+        pollTimer = setInterval(() => {
+          processNextRedisStreams(handler);
+        }, BROKER_POLL_MS);
+
+        reclaimTimer = setInterval(() => {
+          reclaimPendingRedisEntries(handler);
+        }, BROKER_RECLAIM_MS);
+      })
+      .catch((error) => {
+        console.error('[event-bus][redis] failed to start consumer group', error.message);
+      });
 
     return;
   }
@@ -266,6 +311,31 @@ function startEventConsumer(handler) {
   if (state.queue.length > 0) {
     emitter.emit('queue:message');
   }
+}
+
+async function getBrokerMetrics() {
+  if (BROKER_PROVIDER === 'redis-streams') {
+    const groups = await redisCommand('XINFO', ['GROUPS', REDIS_STREAM_KEY]);
+    const pending = await redisCommand('XPENDING', [REDIS_STREAM_KEY, REDIS_CONSUMER_GROUP]);
+
+    return {
+      provider: BROKER_PROVIDER,
+      streamKey: REDIS_STREAM_KEY,
+      deadLetterStreamKey: REDIS_DLQ_STREAM_KEY,
+      consumerGroup: REDIS_CONSUMER_GROUP,
+      consumerName: REDIS_CONSUMER_NAME,
+      groups,
+      pendingSummary: pending
+    };
+  }
+
+  return {
+    provider: BROKER_PROVIDER,
+    inFlight,
+    queued: state.queue.length,
+    deadLetters: state.deadLetters.length,
+    maxAttempts: MAX_ATTEMPTS
+  };
 }
 
 async function getQueueStats() {
@@ -280,7 +350,9 @@ async function getQueueStats() {
       inFlight,
       maxAttempts: MAX_ATTEMPTS,
       streamKey: REDIS_STREAM_KEY,
-      deadLetterStreamKey: REDIS_DLQ_STREAM_KEY
+      deadLetterStreamKey: REDIS_DLQ_STREAM_KEY,
+      consumerGroup: REDIS_CONSUMER_GROUP,
+      consumerName: REDIS_CONSUMER_NAME
     };
   }
 
@@ -362,6 +434,7 @@ module.exports = {
   enqueueNormalizedEvent,
   startEventConsumer,
   getQueueStats,
+  getBrokerMetrics,
   listDeadLetters,
   requeueDeadLetter
 };
