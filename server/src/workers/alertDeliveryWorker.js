@@ -71,7 +71,10 @@ Please review and take action.`
         }
 
         // Send notification with trace context propagation
-        await sendNotification(alert.channel, alert.recipient, notificationData);
+        await sendNotification(alert.channel, alert.recipient, notificationData, {
+          alertId:   alert.id,
+          journeyId: breach.journeyId,
+        });
 
         await prisma.alert.update({
           where: { id: alert.id },

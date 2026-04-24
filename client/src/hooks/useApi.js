@@ -68,3 +68,10 @@ export function useSlaRules() {
     { refreshInterval: POLL_INTERVAL }
   )
 }
+
+export function useNotifications() {
+  return useSWR('/api/internal/notifications', (url) =>
+    apiFetch(url, { auth: true }).then(r => r.data),
+    { refreshInterval: 10000 }
+  )
+}

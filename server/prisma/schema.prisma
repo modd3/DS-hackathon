@@ -198,6 +198,20 @@ model Alert {
   @@index([breachId, status])
 }
 
+model InAppNotification {
+  id          String   @id @default(cuid())
+  recipient   String
+  title       String
+  message     String
+  isRead      Boolean  @default(false)
+  alertId     String?
+  journeyId   String?
+  createdAt   DateTime @default(now())
+
+  @@index([recipient, isRead])
+  @@index([createdAt])
+}
+
 model User {
   id               String      @id @default(cuid())
   email            String      @unique

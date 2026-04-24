@@ -60,6 +60,38 @@ router.delete('/sla/rules/:id', async (req, res) => {
   }
 });
 
+// ── In-app notifications ─────────────────────────────────────────────────────
+
+router.get('/notifications', async (req, res) => {
+  try {
+    const { recipient, limit = 30 } = req.query;
+    const notifications = await prisma.inAppNotification.findMany({
+      where: recipient ? { recipient } : {},
+      orderBy: { createdAt: 'desc' },
+      take: Number(limit),
+    });
+    const unreadCount = await prisma.inAppNotification.count({
+      where: { ...(recipient ? { recipient } : {}), isRead: false },
+    });
+    res.json({ data: { notifications, unreadCount } });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.post('/notifications/mark-read', async (req, res) => {
+  try {
+    const { ids } = req.body; // array of ids, or omit to mark all
+    await prisma.inAppNotification.updateMany({
+      where: ids?.length ? { id: { in: ids } } : {},
+      data:  { isRead: true },
+    });
+    res.json({ data: { ok: true } });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 router.get('/queue/stats', async (_req, res) => {
   try {
     const stats = await getQueueStats();

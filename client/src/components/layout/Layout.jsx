@@ -1,19 +1,23 @@
-import { NavLink, useLocation } from 'react-router-dom'
+import { useState } from 'react'
+import { NavLink, useNavigate } from 'react-router-dom'
 import { clsx } from 'clsx'
 import {
-  LayoutDashboard, List, AlertOctagon, Activity,
-  ShieldCheck, ChevronDown, Eye, Server, TrendingUp
+  LayoutDashboard, List, AlertOctagon,
+  ShieldCheck, ChevronDown, Eye, Server, TrendingUp,
+  Bell, X, ExternalLink
 } from 'lucide-react'
+import { formatDistanceToNow } from 'date-fns'
 import { useRole, ROLES } from '../../context/RoleContext.jsx'
-import { useServerHealth } from '../../hooks/useApi.js'
+import { useServerHealth, useNotifications } from '../../hooks/useApi.js'
+import { apiFetch } from '../../config/config.js'
 
 const NAV_ITEMS = [
-  { to: '/',           label: 'Dashboard',    icon: LayoutDashboard, permission: null                },
-  { to: '/journeys',   label: 'Journeys',     icon: List,            permission: 'journey.read'      },
-  { to: '/incidents',  label: 'SLA Incidents',icon: AlertOctagon,    permission: 'sla.read'          },
-  { to: '/analytics',  label: 'Analytics',    icon: TrendingUp,      permission: 'sla.read'          },
-  { to: '/system',     label: 'System Health',icon: Server,          permission: 'system.read'       },
-  { to: '/admin',      label: 'Admin',        icon: ShieldCheck,     permission: 'admin.users.manage'},
+  { to: '/',          label: 'Dashboard',     icon: LayoutDashboard, permission: null                 },
+  { to: '/journeys',  label: 'Journeys',      icon: List,            permission: 'journey.read'       },
+  { to: '/incidents', label: 'SLA Incidents', icon: AlertOctagon,    permission: 'sla.read'           },
+  { to: '/analytics', label: 'Analytics',     icon: TrendingUp,      permission: 'sla.read'           },
+  { to: '/system',    label: 'System Health', icon: Server,          permission: 'system.read'        },
+  { to: '/admin',     label: 'Admin',         icon: ShieldCheck,     permission: 'admin.users.manage' },
 ]
 
 function RoleSwitcher() {
@@ -47,6 +51,93 @@ function ServerStatus() {
     <div className="flex items-center gap-2 text-xs">
       <span className={clsx('w-1.5 h-1.5 rounded-full flex-shrink-0', ok ? 'bg-emerald-500 animate-pulse-slow' : 'bg-red-500')} />
       <span className={ok ? 'text-emerald-400' : 'text-red-400'}>{ok ? 'Server connected' : 'Server unreachable'}</span>
+    </div>
+  )
+}
+
+function NotificationBell() {
+  const { data, mutate } = useNotifications()
+  const navigate = useNavigate()
+  const [open, setOpen] = useState(false)
+  const unread = data?.unreadCount ?? 0
+  const notifications = data?.notifications ?? []
+
+  async function markAllRead() {
+    await apiFetch('/api/internal/notifications/mark-read', { method: 'POST', auth: true, body: JSON.stringify({}) })
+    mutate()
+  }
+
+  async function markRead(id) {
+    await apiFetch('/api/internal/notifications/mark-read', { method: 'POST', auth: true, body: JSON.stringify({ ids: [id] }) })
+    mutate()
+  }
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setOpen(o => !o)}
+        className={clsx(
+          'relative w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all duration-150',
+          open ? 'bg-surface-600 text-slate-200' : 'text-slate-500 hover:text-slate-300 hover:bg-surface-700'
+        )}
+      >
+        <Bell size={15} className={unread > 0 ? 'text-amber-400' : ''} />
+        <span>Notifications</span>
+        {unread > 0 && (
+          <span className="ml-auto flex-shrink-0 min-w-[18px] h-[18px] rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center px-1">
+            {unread > 99 ? '99+' : unread}
+          </span>
+        )}
+      </button>
+
+      {open && (
+        <div className="absolute bottom-full left-0 right-0 mb-1 bg-surface-700 border border-border rounded-xl shadow-2xl overflow-hidden z-50">
+          <div className="flex items-center justify-between px-3 py-2.5 border-b border-border">
+            <span className="text-xs font-medium text-slate-300">Notifications</span>
+            <div className="flex items-center gap-2">
+              {unread > 0 && (
+                <button onClick={markAllRead} className="text-[10px] text-sky-400 hover:text-sky-300 transition-colors">
+                  Mark all read
+                </button>
+              )}
+              <button onClick={() => setOpen(false)}><X size={12} className="text-slate-500" /></button>
+            </div>
+          </div>
+
+          <div className="max-h-72 overflow-y-auto">
+            {notifications.length === 0 && (
+              <p className="text-xs text-slate-500 text-center py-6">No notifications yet</p>
+            )}
+            {notifications.map(n => (
+              <div
+                key={n.id}
+                className={clsx(
+                  'px-3 py-2.5 border-b border-border last:border-0 cursor-pointer hover:bg-surface-600 transition-colors',
+                  !n.isRead && 'bg-amber-500/5'
+                )}
+                onClick={async () => {
+                  await markRead(n.id)
+                  if (n.journeyId) { navigate(`/journeys/${n.journeyId}`); setOpen(false) }
+                }}
+              >
+                <div className="flex items-start gap-2">
+                  {!n.isRead && <span className="w-1.5 h-1.5 rounded-full bg-amber-400 flex-shrink-0 mt-1.5" />}
+                  <div className={clsx('min-w-0', n.isRead && 'ml-3.5')}>
+                    <p className={clsx('text-xs font-medium truncate', n.isRead ? 'text-slate-400' : 'text-slate-200')}>
+                      {n.title}
+                    </p>
+                    <p className="text-[10px] text-slate-500 mt-0.5 line-clamp-2">{n.message}</p>
+                    <p className="text-[10px] text-slate-600 mt-1">
+                      {formatDistanceToNow(new Date(n.createdAt), { addSuffix: true })}
+                      {n.journeyId && <span className="ml-1 text-sky-500"><ExternalLink size={9} className="inline" /></span>}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -96,6 +187,9 @@ export function Sidebar() {
             </NavLink>
           )
         })}
+        <div className="pt-1">
+          <NotificationBell />
+        </div>
       </nav>
 
       {/* Bottom */}
