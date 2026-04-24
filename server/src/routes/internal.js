@@ -3,10 +3,62 @@ const { getQueueStats, getBrokerMetrics, getBrokerHealth, listDeadLetters, reque
 const { verifyWebhookAuth } = require('../middleware/verifyWebhookAuth');
 const { dispatchPendingAlerts } = require('../workers/alertDeliveryWorker');
 const { evaluateSloPolicies } = require('../workers/sloPolicyWorker');
+const { prisma } = require('../lib/prisma');
 
 const router = express.Router();
 
 router.use(verifyWebhookAuth);
+
+// ── SLA Rules CRUD ───────────────────────────────────────────────────────────
+
+router.get('/sla/rules', async (_req, res) => {
+  try {
+    const rules = await prisma.slaRule.findMany({ orderBy: { stage: 'asc' } });
+    res.json({ data: rules });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.post('/sla/rules', async (req, res) => {
+  try {
+    const { name, description, stage, maxDurationMins, alertChannels, alertRecipients, scope, scopeRef } = req.body;
+    const rule = await prisma.slaRule.create({
+      data: { name, description, stage, maxDurationMins: Number(maxDurationMins), alertChannels: alertChannels || [], alertRecipients: alertRecipients || [], scope: scope || 'GLOBAL', scopeRef: scopeRef || null }
+    });
+    res.status(201).json({ data: rule });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+router.patch('/sla/rules/:id', async (req, res) => {
+  try {
+    const { maxDurationMins, isActive, alertChannels, alertRecipients, description } = req.body;
+    const rule = await prisma.slaRule.update({
+      where: { id: req.params.id },
+      data: {
+        ...(maxDurationMins !== undefined && { maxDurationMins: Number(maxDurationMins) }),
+        ...(isActive !== undefined && { isActive }),
+        ...(alertChannels !== undefined && { alertChannels }),
+        ...(alertRecipients !== undefined && { alertRecipients }),
+        ...(description !== undefined && { description }),
+      }
+    });
+    res.json({ data: rule });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+router.delete('/sla/rules/:id', async (req, res) => {
+  try {
+    await prisma.slaRule.delete({ where: { id: req.params.id } });
+    res.json({ data: { deleted: true } });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
 
 router.get('/queue/stats', async (_req, res) => {
   try {
