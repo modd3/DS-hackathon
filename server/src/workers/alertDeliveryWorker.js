@@ -1,5 +1,6 @@
 const { prisma } = require('../lib/prisma');
 const { trace, SpanStatusCode } = require('@opentelemetry/api');
+const { sendNotification } = require('../services/notificationService');
 const tracer = trace.getTracer('dayliff.alerts');
 
 async function dispatchPendingAlerts(limit = 100) {
@@ -8,20 +9,69 @@ async function dispatchPendingAlerts(limit = 100) {
     const pendingAlerts = await prisma.alert.findMany({
       where: { status: 'PENDING' },
       orderBy: { createdAt: 'asc' },
-      take: limit
+      take: limit,
+      include: {
+        breach: {
+          include: {
+            journey: {
+              include: { customer: true }
+            },
+            rule: true
+          }
+        }
+      }
     });
 
     let sent = 0;
     let failed = 0;
 
     for (const alert of pendingAlerts) {
+      const alertSpan = tracer.startSpan('alert.send', {
+        attributes: {
+          'alert.id': alert.id,
+          'alert.channel': alert.channel,
+          'alert.recipient': alert.recipient
+        }
+      });
+
       try {
-        // Prototype delivery shim (replace with real provider adapters).
-        console.log('[alert-dispatcher] sending', {
-          alertId: alert.id,
-          channel: alert.channel,
-          recipient: alert.recipient
-        });
+        // Prepare notification data based on breach details
+        const breach = alert.breach;
+        const journey = breach.journey;
+        const customer = journey.customer;
+        const rule = breach.rule;
+
+        let notificationData;
+        switch (alert.channel) {
+          case 'EMAIL':
+            notificationData = {
+              subject: `SLA Breach Alert: ${journey.title}`,
+              body: `SLA breach detected for journey "${journey.title}" (Customer: ${customer.fullName}).
+Stage: ${breach.stage}
+Rule: ${rule.name}
+Breached at: ${breach.breachedAt.toISOString()}
+Duration: ${breach.durationMins} minutes over ${rule.maxDurationMins} minute limit
+
+Please review and take action.`
+            };
+            break;
+          case 'SMS':
+            notificationData = {
+              message: `SLA Breach: ${journey.title} - ${breach.stage} stage exceeded ${rule.maxDurationMins}min limit.`
+            };
+            break;
+          case 'IN_APP':
+            notificationData = {
+              title: 'SLA Breach Alert',
+              message: `${journey.title} has breached SLA in ${breach.stage} stage.`
+            };
+            break;
+          default:
+            throw new Error(`Unsupported channel: ${alert.channel}`);
+        }
+
+        // Send notification with trace context propagation
+        await sendNotification(alert.channel, alert.recipient, notificationData);
 
         await prisma.alert.update({
           where: { id: alert.id },
@@ -33,6 +83,7 @@ async function dispatchPendingAlerts(limit = 100) {
         });
 
         sent += 1;
+        alertSpan.setStatus({ code: SpanStatusCode.OK });
       } catch (error) {
         await prisma.alert.update({
           where: { id: alert.id },
@@ -43,6 +94,10 @@ async function dispatchPendingAlerts(limit = 100) {
         });
 
         failed += 1;
+        alertSpan.recordException(error);
+        alertSpan.setStatus({ code: SpanStatusCode.ERROR, message: error.message });
+      } finally {
+        alertSpan.end();
       }
     }
 

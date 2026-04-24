@@ -1,11 +1,12 @@
 const EventEmitter = require('events');
 const fs = require('fs');
+const path = require('path');
 
 const emitter = new EventEmitter();
 const MAX_ATTEMPTS = 3;
 const MAX_QUEUE_SIZE = Number(process.env.QUEUE_MAX_SIZE || 10000);
 const BROKER_PROVIDER = process.env.BROKER_PROVIDER || 'file-state';
-const BROKER_STATE_FILE = process.env.BROKER_STATE_FILE || 'server/.broker-state.json';
+const BROKER_STATE_FILE = process.env.BROKER_STATE_FILE || '.broker-state.json';
 const BROKER_POLL_MS = Number(process.env.BROKER_POLL_MS || 1000);
 const BROKER_RECLAIM_MS = Number(process.env.BROKER_RECLAIM_MS || 30000);
 
@@ -30,7 +31,14 @@ function hydrateStateFromDisk() {
   if (BROKER_PROVIDER !== 'file-state') return;
 
   try {
-    if (!fs.existsSync(BROKER_STATE_FILE)) return;
+    if (!fs.existsSync(BROKER_STATE_FILE)) {
+      const dir = path.dirname(BROKER_STATE_FILE);
+      if (dir && dir !== '.' && !fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      fs.writeFileSync(BROKER_STATE_FILE, JSON.stringify(state, null, 2));
+      return;
+    }
 
     const raw = fs.readFileSync(BROKER_STATE_FILE, 'utf8');
     if (!raw.trim()) return;
