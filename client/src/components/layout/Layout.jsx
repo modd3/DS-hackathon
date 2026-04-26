@@ -77,66 +77,105 @@ function NotificationBell() {
       <button
         onClick={() => setOpen(o => !o)}
         className={clsx(
-          'relative w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all duration-150',
+          'w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-150',
           open ? 'bg-surface-600 text-slate-200' : 'text-slate-500 hover:text-slate-300 hover:bg-surface-700'
         )}
       >
-        <Bell size={15} className={unread > 0 ? 'text-amber-400' : ''} />
-        <span>Notifications</span>
+        <Bell size={15} className={clsx(open ? 'text-amber-400' : unread > 0 ? 'text-amber-400' : '')} />
+        <span className="flex-1 text-left">Notifications</span>
         {unread > 0 && (
-          <span className="ml-auto flex-shrink-0 min-w-[18px] h-[18px] rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center px-1">
+          <span className="flex-shrink-0 min-w-[18px] h-[18px] rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center px-1">
             {unread > 99 ? '99+' : unread}
           </span>
         )}
       </button>
 
       {open && (
-        <div className="absolute bottom-full left-0 right-0 mb-1 bg-surface-700 border border-border rounded-xl shadow-2xl overflow-hidden z-50">
-          <div className="flex items-center justify-between px-3 py-2.5 border-b border-border">
-            <span className="text-xs font-medium text-slate-300">Notifications</span>
-            <div className="flex items-center gap-2">
-              {unread > 0 && (
-                <button onClick={markAllRead} className="text-[10px] text-sky-400 hover:text-sky-300 transition-colors">
-                  Mark all read
-                </button>
-              )}
-              <button onClick={() => setOpen(false)}><X size={12} className="text-slate-500" /></button>
-            </div>
-          </div>
+        <>
+          {/* backdrop to close on outside click */}
+          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
 
-          <div className="max-h-72 overflow-y-auto">
-            {notifications.length === 0 && (
-              <p className="text-xs text-slate-500 text-center py-6">No notifications yet</p>
-            )}
-            {notifications.map(n => (
-              <div
-                key={n.id}
-                className={clsx(
-                  'px-3 py-2.5 border-b border-border last:border-0 cursor-pointer hover:bg-surface-600 transition-colors',
-                  !n.isRead && 'bg-amber-500/5'
+          {/* panel — fixed position, left-aligned to sidebar, never clips viewport */}
+          <div
+            className="fixed z-50 bg-surface-700 border border-border rounded-xl shadow-2xl overflow-hidden"
+            style={{ left: '224px', bottom: '80px', width: '300px', maxHeight: 'calc(100vh - 120px)' }}
+          >
+            {/* header */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-surface-800">
+              <div className="flex items-center gap-2">
+                <Bell size={13} className="text-amber-400" />
+                <span className="text-xs font-semibold text-slate-200">Notifications</span>
+                {unread > 0 && (
+                  <span className="text-[10px] bg-red-500/20 text-red-400 border border-red-500/30 px-1.5 py-0.5 rounded-full font-medium">
+                    {unread} unread
+                  </span>
                 )}
-                onClick={async () => {
-                  await markRead(n.id)
-                  if (n.journeyId) { navigate(`/journeys/${n.journeyId}`); setOpen(false) }
-                }}
-              >
-                <div className="flex items-start gap-2">
-                  {!n.isRead && <span className="w-1.5 h-1.5 rounded-full bg-amber-400 flex-shrink-0 mt-1.5" />}
-                  <div className={clsx('min-w-0', n.isRead && 'ml-3.5')}>
-                    <p className={clsx('text-xs font-medium truncate', n.isRead ? 'text-slate-400' : 'text-slate-200')}>
-                      {n.title}
-                    </p>
-                    <p className="text-[10px] text-slate-500 mt-0.5 line-clamp-2">{n.message}</p>
-                    <p className="text-[10px] text-slate-600 mt-1">
-                      {formatDistanceToNow(new Date(n.createdAt), { addSuffix: true })}
-                      {n.journeyId && <span className="ml-1 text-sky-500"><ExternalLink size={9} className="inline" /></span>}
-                    </p>
+              </div>
+              <div className="flex items-center gap-2">
+                {unread > 0 && (
+                  <button
+                    onClick={e => { e.stopPropagation(); markAllRead() }}
+                    className="text-[10px] text-sky-400 hover:text-sky-300 transition-colors"
+                  >
+                    Mark all read
+                  </button>
+                )}
+                <button onClick={() => setOpen(false)} className="text-slate-500 hover:text-slate-300 transition-colors">
+                  <X size={13} />
+                </button>
+              </div>
+            </div>
+
+            {/* list */}
+            <div className="overflow-y-auto" style={{ maxHeight: 'calc(100vh - 200px)' }}>
+              {notifications.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-10 text-center">
+                  <Bell size={24} className="text-slate-600 mb-2" />
+                  <p className="text-xs text-slate-500">No notifications yet</p>
+                  <p className="text-[10px] text-slate-600 mt-1">SLA breach alerts will appear here</p>
+                </div>
+              ) : notifications.map(n => (
+                <div
+                  key={n.id}
+                  className={clsx(
+                    'px-4 py-3 border-b border-border last:border-0 cursor-pointer hover:bg-surface-600 transition-colors',
+                    !n.isRead && 'bg-amber-500/5 border-l-2 border-l-amber-500/40'
+                  )}
+                  onClick={async () => {
+                    await markRead(n.id)
+                    if (n.journeyId) { navigate(`/journeys/${n.journeyId}`); setOpen(false) }
+                    else setOpen(false)
+                  }}
+                >
+                  <div className="flex items-start gap-2.5">
+                    <div className={clsx(
+                      'flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center mt-0.5',
+                      n.isRead ? 'bg-surface-600' : 'bg-amber-500/15 border border-amber-500/30'
+                    )}>
+                      <Bell size={10} className={n.isRead ? 'text-slate-600' : 'text-amber-400'} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className={clsx('text-xs font-medium leading-snug', n.isRead ? 'text-slate-400' : 'text-slate-200')}>
+                        {n.title}
+                      </p>
+                      <p className="text-[10px] text-slate-500 mt-0.5 leading-relaxed line-clamp-2">{n.message}</p>
+                      <div className="flex items-center gap-2 mt-1.5">
+                        <p className="text-[10px] text-slate-600">
+                          {formatDistanceToNow(new Date(n.createdAt), { addSuffix: true })}
+                        </p>
+                        {n.journeyId && (
+                          <span className="text-[10px] text-sky-500 flex items-center gap-0.5">
+                            <ExternalLink size={9} /> view journey
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   )
