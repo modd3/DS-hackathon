@@ -44,6 +44,7 @@ async function send(system, body) {
     body: payload,
   });
   const data = await res.json();
+  console.log('[webhook]', data)
   if (!res.ok) throw new Error(JSON.stringify(data));
   return data;
 }
@@ -162,8 +163,27 @@ const JOURNEYS = [
       { system: 'crm',         type: 'STAGE_ENTERED',     stage: 'DESIGN',     at: hoursAgo(14), actor: 'Hassan Abdi',    id: 'E082-03' },
       { system: 'engineering', type: 'HANDOFF',           stage: 'DESIGN',     at: hoursAgo(13), actor: 'Fatuma Warsame', id: 'E082-04' },
       { system: 'engineering', type: 'COMMENT_ADDED',     stage: 'DESIGN',     at: minsAgo(120), actor: 'Fatuma Warsame', id: 'E082-05', payload: { comment: 'Remote site survey scheduled for tomorrow. Solar irradiance data pulled from NASA POWER API.' } },
+      { system: 'crm',         type: 'STAGE_ENTERED',     stage: 'QUOTATION',  at: hoursAgo(107), actor: 'Lydia Muthoni',  id: 'E082-05' },
+      { system: 'crm',         type: 'STAGE_COMPLETED',   stage: 'QUOTATION',  at: hoursAgo(100), actor: 'Lydia Muthoni',  id: 'E082-06' },
+      { system: 'erp',         type: 'STAGE_ENTERED',     stage: 'DELIVERY',   at: minsAgo(50),  actor: 'Logistics ERP',  id: 'E082-07' },
+      { system: 'erp',         type: 'DELIVERY_CONFIRMED',stage: 'DELIVERY',   at: minsAgo(20),  actor: 'Logistics ERP',  id: 'E082-08', payload: { invoiceNo: 'INV-2025-00556655', deliveredBy: 'Dayliff Garissa Branch' } },
     ],
   },
+  {
+  ref: 'JRN-2025-0090',                          // unique ref
+  customer: {
+    fullName: 'Dayliff Demo Customer',
+    email: 'demo@example.com',
+    phone: '+254700000000',
+    region: 'Nairobi',
+    customerCode: 'CUST-0090'                    // unique customer code
+  },
+  title: 'Your journey title here',
+  events: [
+    { system: 'crm', type: 'REQUEST_CREATED', stage: 'INQUIRY',
+      at: minsAgo(10), actor: 'Your Name', id: 'E090-01' },  // unique id
+  ],
+},
 ];
 
 // ─── seed ────────────────────────────────────────────────────────────────────

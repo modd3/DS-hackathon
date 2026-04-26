@@ -12,15 +12,18 @@ function initTelemetry() {
     return;
   }
 
+  const authHeader = process.env.OTEL_EXPORTER_AUTH_HEADER;
   const serviceName = process.env.OTEL_SERVICE_NAME || 'dayliff-1000-eyes-server';
   const endpoint = process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4318';
 
   const traceExporter = new OTLPTraceExporter({
-    url: `${endpoint}/v1/traces`
+    url: `${endpoint}/v1/traces`,
+    headers: authHeader ? {Authorization: authHeader} : {}
   });
 
   const metricExporter = new OTLPMetricExporter({
-    url: `${endpoint}/v1/metrics`
+    url: `${endpoint}/v1/metrics`,
+    headers: authHeader ? {Authorization: authHeader} : {}
   });
 
   sdk = new NodeSDK({

@@ -89,7 +89,11 @@ router.get('/analytics', async (req, res) => {
       },
     });
   } catch (error) {
-    return res.status(500).json({ error: error.message });
+    if (error.message.includes('Please make sure your database server is running')) {
+      const message = "[DB SERVER ERROR] Please make sure your database server is running";
+      return res.status(500).json({ error: message });
+    }
+    return res.status(500).json({ error: error.message});
   }
 });
 router.get('/', async (req, res) => {
@@ -111,7 +115,11 @@ router.get('/', async (req, res) => {
 
     return res.json({ data: journeys });
   } catch (error) {
-    return res.status(500).json({ error: error.message });
+    if (error.message.includes('Please make sure your database server is running')) {
+      const message = "[DB SERVER ERROR] Please make sure your database server is running";
+      return res.status(500).json({ error: message });
+    }
+    return res.status(500).json({ error: error.message});
   }
 });
 
@@ -125,7 +133,11 @@ router.get('/:journeyId/timeline', async (req, res) => {
 
     return res.json({ data: timeline });
   } catch (error) {
-    return res.status(500).json({ error: error.message });
+    if (error.message.includes('Please make sure your database server is running')) {
+      const message = "[DB SERVER ERROR] Please make sure your database server is running";
+      return res.status(500).json({ error: message });
+    }
+    return res.status(500).json({ error: error.message});
   }
 });
 
@@ -161,7 +173,11 @@ router.get('/:journeyId/current-status', async (req, res) => {
       }
     });
   } catch (error) {
-    return res.status(500).json({ error: error.message });
+    if (error.message.includes('Please make sure your database server is running')) {
+      const message = "[DB SERVER ERROR] Please make sure your database server is running";
+      return res.status(500).json({ error: message });
+    }
+    return res.status(500).json({ error: error.message});
   }
 });
 

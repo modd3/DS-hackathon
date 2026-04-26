@@ -3,7 +3,7 @@
 export const API_BASE = import.meta.env.DEV ? '' : (import.meta.env.VITE_API_BASE_URL || '')
 export const POLL_INTERVAL = Number(import.meta.env.VITE_POLL_INTERVAL_MS || 15000)
 
-export const WEBHOOK_SECRET = import.meta.env.VITE_WEBHOOK_SECRET || ''
+export const WEBHOOK_SECRET = import.meta.env.VITE_WEBHOOK_SECRET || 'SVp3R53cRe7sEcr37'
 
 export async function apiFetch(path, options = {}) {
   const url = `${API_BASE}${path}`

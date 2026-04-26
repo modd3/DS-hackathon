@@ -1,4 +1,1086 @@
 {
   "queue": [],
-  "deadLetters": []
+  "deadLetters": [
+    {
+      "id": "evt_1777181338883_ncrcwzh0",
+      "enqueuedAt": "2026-04-26T05:28:58.883Z",
+      "attempts": 3,
+      "normalized": {
+        "source": "CRM",
+        "sourceEventId": "E041-01",
+        "sourceSystem": "crm",
+        "journeyExternalRef": "JRN-2025-0041",
+        "customer": {
+          "fullName": "Coastal Agri-Ventures Ltd",
+          "email": "ops@coastalagri.co.ke",
+          "phone": "+254711200100",
+          "region": "Mombasa",
+          "customerCode": "CUST-0041"
+        },
+        "journey": {
+          "title": "Borehole pump installation — Kilifi farm (50m depth)",
+          "description": "Borehole pump installation — Kilifi farm (50m depth)"
+        },
+        "event": {
+          "type": "REQUEST_CREATED",
+          "stage": "INQUIRY",
+          "occurredAt": "2026-04-23T05:28:58.712Z",
+          "actorUserId": "amina_odhiambo",
+          "actorName": "Amina Odhiambo"
+        },
+        "payload": {}
+      },
+      "traceContext": {},
+      "failedAt": "2026-04-26T05:28:59.973Z",
+      "reason": "Can't reach database server at `localhost:5432`\n\nPlease make sure your database server is running at `localhost:5432`."
+    },
+    {
+      "id": "evt_1777181338985_9p41sq63",
+      "enqueuedAt": "2026-04-26T05:28:58.985Z",
+      "attempts": 3,
+      "normalized": {
+        "source": "CRM",
+        "sourceEventId": "E041-02",
+        "sourceSystem": "crm",
+        "journeyExternalRef": "JRN-2025-0041",
+        "customer": {
+          "fullName": "Coastal Agri-Ventures Ltd",
+          "email": "ops@coastalagri.co.ke",
+          "phone": "+254711200100",
+          "region": "Mombasa",
+          "customerCode": "CUST-0041"
+        },
+        "journey": {
+          "title": "Borehole pump installation — Kilifi farm (50m depth)",
+          "description": "Borehole pump installation — Kilifi farm (50m depth)"
+        },
+        "event": {
+          "type": "STAGE_ENTERED",
+          "stage": "DESIGN",
+          "occurredAt": "2026-04-23T09:28:58.712Z",
+          "actorUserId": "brian_mwangi",
+          "actorName": "Brian Mwangi"
+        },
+        "payload": {}
+      },
+      "traceContext": {},
+      "failedAt": "2026-04-26T05:29:00.128Z",
+      "reason": "Can't reach database server at `localhost:5432`\n\nPlease make sure your database server is running at `localhost:5432`."
+    },
+    {
+      "id": "evt_1777181339074_34geih8q",
+      "enqueuedAt": "2026-04-26T05:28:59.074Z",
+      "attempts": 3,
+      "normalized": {
+        "source": "ENGINEERING",
+        "sourceEventId": "E041-03",
+        "sourceSystem": "engineering",
+        "journeyExternalRef": "JRN-2025-0041",
+        "customer": {
+          "fullName": "Coastal Agri-Ventures Ltd",
+          "email": "ops@coastalagri.co.ke",
+          "phone": "+254711200100",
+          "region": "Mombasa",
+          "customerCode": "CUST-0041"
+        },
+        "journey": {
+          "title": "Borehole pump installation — Kilifi farm (50m depth)",
+          "description": "Borehole pump installation — Kilifi farm (50m depth)"
+        },
+        "event": {
+          "type": "HANDOFF",
+          "stage": "DESIGN",
+          "occurredAt": "2026-04-23T11:28:58.712Z",
+          "actorUserId": "brian_mwangi",
+          "actorName": "Brian Mwangi"
+        },
+        "payload": {}
+      },
+      "traceContext": {},
+      "failedAt": "2026-04-26T05:29:00.219Z",
+      "reason": "Can't reach database server at `localhost:5432`\n\nPlease make sure your database server is running at `localhost:5432`."
+    },
+    {
+      "id": "evt_1777181339162_mack9vp2",
+      "enqueuedAt": "2026-04-26T05:28:59.162Z",
+      "attempts": 3,
+      "normalized": {
+        "source": "ENGINEERING",
+        "sourceEventId": "E041-04",
+        "sourceSystem": "engineering",
+        "journeyExternalRef": "JRN-2025-0041",
+        "customer": {
+          "fullName": "Coastal Agri-Ventures Ltd",
+          "email": "ops@coastalagri.co.ke",
+          "phone": "+254711200100",
+          "region": "Mombasa",
+          "customerCode": "CUST-0041"
+        },
+        "journey": {
+          "title": "Borehole pump installation — Kilifi farm (50m depth)",
+          "description": "Borehole pump installation — Kilifi farm (50m depth)"
+        },
+        "event": {
+          "type": "DOCUMENT_UPLOADED",
+          "stage": "DESIGN",
+          "occurredAt": "2026-04-23T17:28:58.712Z",
+          "actorUserId": "brian_mwangi",
+          "actorName": "Brian Mwangi"
+        },
+        "payload": {
+          "doc": "site-survey-kilifi.pdf"
+        }
+      },
+      "traceContext": {},
+      "failedAt": "2026-04-26T05:29:00.280Z",
+      "reason": "Can't reach database server at `localhost:5432`\n\nPlease make sure your database server is running at `localhost:5432`."
+    },
+    {
+      "id": "evt_1777181339250_5a44z5p4",
+      "enqueuedAt": "2026-04-26T05:28:59.250Z",
+      "attempts": 3,
+      "normalized": {
+        "source": "ENGINEERING",
+        "sourceEventId": "E041-05",
+        "sourceSystem": "engineering",
+        "journeyExternalRef": "JRN-2025-0041",
+        "customer": {
+          "fullName": "Coastal Agri-Ventures Ltd",
+          "email": "ops@coastalagri.co.ke",
+          "phone": "+254711200100",
+          "region": "Mombasa",
+          "customerCode": "CUST-0041"
+        },
+        "journey": {
+          "title": "Borehole pump installation — Kilifi farm (50m depth)",
+          "description": "Borehole pump installation — Kilifi farm (50m depth)"
+        },
+        "event": {
+          "type": "STAGE_COMPLETED",
+          "stage": "DESIGN",
+          "occurredAt": "2026-04-23T22:28:58.712Z",
+          "actorUserId": "brian_mwangi",
+          "actorName": "Brian Mwangi"
+        },
+        "payload": {}
+      },
+      "traceContext": {},
+      "failedAt": "2026-04-26T05:29:00.364Z",
+      "reason": "Can't reach database server at `localhost:5432`\n\nPlease make sure your database server is running at `localhost:5432`."
+    },
+    {
+      "id": "evt_1777181339339_1wuodqle",
+      "enqueuedAt": "2026-04-26T05:28:59.339Z",
+      "attempts": 3,
+      "normalized": {
+        "source": "CRM",
+        "sourceEventId": "E041-06",
+        "sourceSystem": "crm",
+        "journeyExternalRef": "JRN-2025-0041",
+        "customer": {
+          "fullName": "Coastal Agri-Ventures Ltd",
+          "email": "ops@coastalagri.co.ke",
+          "phone": "+254711200100",
+          "region": "Mombasa",
+          "customerCode": "CUST-0041"
+        },
+        "journey": {
+          "title": "Borehole pump installation — Kilifi farm (50m depth)",
+          "description": "Borehole pump installation — Kilifi farm (50m depth)"
+        },
+        "event": {
+          "type": "STAGE_ENTERED",
+          "stage": "QUOTATION",
+          "occurredAt": "2026-04-23T23:28:58.712Z",
+          "actorUserId": "amina_odhiambo",
+          "actorName": "Amina Odhiambo"
+        },
+        "payload": {}
+      },
+      "traceContext": {},
+      "failedAt": "2026-04-26T05:29:00.474Z",
+      "reason": "Can't reach database server at `localhost:5432`\n\nPlease make sure your database server is running at `localhost:5432`."
+    },
+    {
+      "id": "evt_1777181339426_pcgaf3tu",
+      "enqueuedAt": "2026-04-26T05:28:59.427Z",
+      "attempts": 3,
+      "normalized": {
+        "source": "CRM",
+        "sourceEventId": "E041-07",
+        "sourceSystem": "crm",
+        "journeyExternalRef": "JRN-2025-0041",
+        "customer": {
+          "fullName": "Coastal Agri-Ventures Ltd",
+          "email": "ops@coastalagri.co.ke",
+          "phone": "+254711200100",
+          "region": "Mombasa",
+          "customerCode": "CUST-0041"
+        },
+        "journey": {
+          "title": "Borehole pump installation — Kilifi farm (50m depth)",
+          "description": "Borehole pump installation — Kilifi farm (50m depth)"
+        },
+        "event": {
+          "type": "DOCUMENT_UPLOADED",
+          "stage": "QUOTATION",
+          "occurredAt": "2026-04-24T03:28:58.712Z",
+          "actorUserId": "amina_odhiambo",
+          "actorName": "Amina Odhiambo"
+        },
+        "payload": {
+          "doc": "quotation-Q2025-041.pdf",
+          "amount": 485000
+        }
+      },
+      "traceContext": {},
+      "failedAt": "2026-04-26T05:29:00.558Z",
+      "reason": "Can't reach database server at `localhost:5432`\n\nPlease make sure your database server is running at `localhost:5432`."
+    },
+    {
+      "id": "evt_1777181339513_d8sl4c10",
+      "enqueuedAt": "2026-04-26T05:28:59.513Z",
+      "attempts": 3,
+      "normalized": {
+        "source": "CRM",
+        "sourceEventId": "E041-08",
+        "sourceSystem": "crm",
+        "journeyExternalRef": "JRN-2025-0041",
+        "customer": {
+          "fullName": "Coastal Agri-Ventures Ltd",
+          "email": "ops@coastalagri.co.ke",
+          "phone": "+254711200100",
+          "region": "Mombasa",
+          "customerCode": "CUST-0041"
+        },
+        "journey": {
+          "title": "Borehole pump installation — Kilifi farm (50m depth)",
+          "description": "Borehole pump installation — Kilifi farm (50m depth)"
+        },
+        "event": {
+          "type": "STAGE_COMPLETED",
+          "stage": "QUOTATION",
+          "occurredAt": "2026-04-24T05:28:58.712Z",
+          "actorUserId": "amina_odhiambo",
+          "actorName": "Amina Odhiambo"
+        },
+        "payload": {}
+      },
+      "traceContext": {},
+      "failedAt": "2026-04-26T05:29:00.618Z",
+      "reason": "Can't reach database server at `localhost:5432`\n\nPlease make sure your database server is running at `localhost:5432`."
+    },
+    {
+      "id": "evt_1777181339605_g3zsvawz",
+      "enqueuedAt": "2026-04-26T05:28:59.605Z",
+      "attempts": 3,
+      "normalized": {
+        "source": "ERP",
+        "sourceEventId": "E041-09",
+        "sourceSystem": "erp",
+        "journeyExternalRef": "JRN-2025-0041",
+        "customer": {
+          "fullName": "Coastal Agri-Ventures Ltd",
+          "email": "ops@coastalagri.co.ke",
+          "phone": "+254711200100",
+          "region": "Mombasa",
+          "customerCode": "CUST-0041"
+        },
+        "journey": {
+          "title": "Borehole pump installation — Kilifi farm (50m depth)",
+          "description": "Borehole pump installation — Kilifi farm (50m depth)"
+        },
+        "event": {
+          "type": "STAGE_ENTERED",
+          "stage": "DELIVERY",
+          "occurredAt": "2026-04-25T05:28:58.712Z",
+          "actorUserId": "logistics_erp",
+          "actorName": "Logistics ERP"
+        },
+        "payload": {}
+      },
+      "traceContext": {},
+      "failedAt": "2026-04-26T05:29:00.727Z",
+      "reason": "Can't reach database server at `localhost:5432`\n\nPlease make sure your database server is running at `localhost:5432`."
+    },
+    {
+      "id": "evt_1777181339707_utiqn89r",
+      "enqueuedAt": "2026-04-26T05:28:59.707Z",
+      "attempts": 3,
+      "normalized": {
+        "source": "ERP",
+        "sourceEventId": "E041-10",
+        "sourceSystem": "erp",
+        "journeyExternalRef": "JRN-2025-0041",
+        "customer": {
+          "fullName": "Coastal Agri-Ventures Ltd",
+          "email": "ops@coastalagri.co.ke",
+          "phone": "+254711200100",
+          "region": "Mombasa",
+          "customerCode": "CUST-0041"
+        },
+        "journey": {
+          "title": "Borehole pump installation — Kilifi farm (50m depth)",
+          "description": "Borehole pump installation — Kilifi farm (50m depth)"
+        },
+        "event": {
+          "type": "DELIVERY_CONFIRMED",
+          "stage": "DELIVERY",
+          "occurredAt": "2026-04-26T03:28:58.712Z",
+          "actorUserId": "logistics_erp",
+          "actorName": "Logistics ERP"
+        },
+        "payload": {
+          "invoiceNo": "INV-2025-0041",
+          "deliveredBy": "Dayliff Mombasa Branch"
+        }
+      },
+      "traceContext": {},
+      "failedAt": "2026-04-26T05:29:00.838Z",
+      "reason": "Can't reach database server at `localhost:5432`\n\nPlease make sure your database server is running at `localhost:5432`."
+    },
+    {
+      "id": "evt_1777181339801_eoie78ds",
+      "enqueuedAt": "2026-04-26T05:28:59.801Z",
+      "attempts": 3,
+      "normalized": {
+        "source": "CRM",
+        "sourceEventId": "E058-01",
+        "sourceSystem": "crm",
+        "journeyExternalRef": "JRN-2025-0058",
+        "customer": {
+          "fullName": "Kenyatta National Hospital",
+          "email": "facilities@knh.or.ke",
+          "phone": "+254202726300",
+          "region": "Nairobi",
+          "customerCode": "CUST-0058"
+        },
+        "journey": {
+          "title": "Solar water heating system — 500L capacity, ward block C",
+          "description": "Solar water heating system — 500L capacity, ward block C"
+        },
+        "event": {
+          "type": "REQUEST_CREATED",
+          "stage": "INQUIRY",
+          "occurredAt": "2026-04-24T23:28:58.712Z",
+          "actorUserId": "peter_kariuki",
+          "actorName": "Peter Kariuki"
+        },
+        "payload": {}
+      },
+      "traceContext": {},
+      "failedAt": "2026-04-26T05:29:00.919Z",
+      "reason": "Can't reach database server at `localhost:5432`\n\nPlease make sure your database server is running at `localhost:5432`."
+    },
+    {
+      "id": "evt_1777181339885_790kd60r",
+      "enqueuedAt": "2026-04-26T05:28:59.885Z",
+      "attempts": 3,
+      "normalized": {
+        "source": "CRM",
+        "sourceEventId": "E058-02",
+        "sourceSystem": "crm",
+        "journeyExternalRef": "JRN-2025-0058",
+        "customer": {
+          "fullName": "Kenyatta National Hospital",
+          "email": "facilities@knh.or.ke",
+          "phone": "+254202726300",
+          "region": "Nairobi",
+          "customerCode": "CUST-0058"
+        },
+        "journey": {
+          "title": "Solar water heating system — 500L capacity, ward block C",
+          "description": "Solar water heating system — 500L capacity, ward block C"
+        },
+        "event": {
+          "type": "COMMENT_ADDED",
+          "stage": "INQUIRY",
+          "occurredAt": "2026-04-25T01:28:58.712Z",
+          "actorUserId": "peter_kariuki",
+          "actorName": "Peter Kariuki"
+        },
+        "payload": {
+          "comment": "Client requires KEBS-certified panels only. Budget approved at KES 320,000."
+        }
+      },
+      "traceContext": {},
+      "failedAt": "2026-04-26T05:29:01.001Z",
+      "reason": "Can't reach database server at `localhost:5432`\n\nPlease make sure your database server is running at `localhost:5432`."
+    },
+    {
+      "id": "evt_1777181339971_hrsdhtwa",
+      "enqueuedAt": "2026-04-26T05:28:59.971Z",
+      "attempts": 3,
+      "normalized": {
+        "source": "CRM",
+        "sourceEventId": "E058-03",
+        "sourceSystem": "crm",
+        "journeyExternalRef": "JRN-2025-0058",
+        "customer": {
+          "fullName": "Kenyatta National Hospital",
+          "email": "facilities@knh.or.ke",
+          "phone": "+254202726300",
+          "region": "Nairobi",
+          "customerCode": "CUST-0058"
+        },
+        "journey": {
+          "title": "Solar water heating system — 500L capacity, ward block C",
+          "description": "Solar water heating system — 500L capacity, ward block C"
+        },
+        "event": {
+          "type": "STAGE_ENTERED",
+          "stage": "DESIGN",
+          "occurredAt": "2026-04-25T03:28:58.712Z",
+          "actorUserId": "peter_kariuki",
+          "actorName": "Peter Kariuki"
+        },
+        "payload": {}
+      },
+      "traceContext": {},
+      "failedAt": "2026-04-26T05:29:01.082Z",
+      "reason": "Can't reach database server at `localhost:5432`\n\nPlease make sure your database server is running at `localhost:5432`."
+    },
+    {
+      "id": "evt_1777181340055_b2nytg0t",
+      "enqueuedAt": "2026-04-26T05:29:00.055Z",
+      "attempts": 3,
+      "normalized": {
+        "source": "ENGINEERING",
+        "sourceEventId": "E058-04",
+        "sourceSystem": "engineering",
+        "journeyExternalRef": "JRN-2025-0058",
+        "customer": {
+          "fullName": "Kenyatta National Hospital",
+          "email": "facilities@knh.or.ke",
+          "phone": "+254202726300",
+          "region": "Nairobi",
+          "customerCode": "CUST-0058"
+        },
+        "journey": {
+          "title": "Solar water heating system — 500L capacity, ward block C",
+          "description": "Solar water heating system — 500L capacity, ward block C"
+        },
+        "event": {
+          "type": "HANDOFF",
+          "stage": "DESIGN",
+          "occurredAt": "2026-04-25T04:28:58.712Z",
+          "actorUserId": "grace_njoroge",
+          "actorName": "Grace Njoroge"
+        },
+        "payload": {}
+      },
+      "traceContext": {},
+      "failedAt": "2026-04-26T05:29:01.174Z",
+      "reason": "Can't reach database server at `localhost:5432`\n\nPlease make sure your database server is running at `localhost:5432`."
+    },
+    {
+      "id": "evt_1777181340309_tnx8utfe",
+      "enqueuedAt": "2026-04-26T05:29:00.309Z",
+      "attempts": 3,
+      "normalized": {
+        "source": "CRM",
+        "sourceEventId": "E063-02",
+        "sourceSystem": "crm",
+        "journeyExternalRef": "JRN-2025-0063",
+        "customer": {
+          "fullName": "Nyanza Flower Farms",
+          "email": "procurement@nyanzaflowers.co.ke",
+          "phone": "+254572021900",
+          "region": "Kisumu",
+          "customerCode": "CUST-0063"
+        },
+        "journey": {
+          "title": "Drip irrigation pump system — 40-acre flower farm",
+          "description": "Drip irrigation pump system — 40-acre flower farm"
+        },
+        "event": {
+          "type": "STAGE_ENTERED",
+          "stage": "DESIGN",
+          "occurredAt": "2026-04-22T11:28:58.712Z",
+          "actorUserId": "samuel_otieno",
+          "actorName": "Samuel Otieno"
+        },
+        "payload": {}
+      },
+      "traceContext": {},
+      "failedAt": "2026-04-26T05:29:01.434Z",
+      "reason": "Can't reach database server at `localhost:5432`\n\nPlease make sure your database server is running at `localhost:5432`."
+    },
+    {
+      "id": "evt_1777181340393_2wtin2x8",
+      "enqueuedAt": "2026-04-26T05:29:00.393Z",
+      "attempts": 3,
+      "normalized": {
+        "source": "ENGINEERING",
+        "sourceEventId": "E063-03",
+        "sourceSystem": "engineering",
+        "journeyExternalRef": "JRN-2025-0063",
+        "customer": {
+          "fullName": "Nyanza Flower Farms",
+          "email": "procurement@nyanzaflowers.co.ke",
+          "phone": "+254572021900",
+          "region": "Kisumu",
+          "customerCode": "CUST-0063"
+        },
+        "journey": {
+          "title": "Drip irrigation pump system — 40-acre flower farm",
+          "description": "Drip irrigation pump system — 40-acre flower farm"
+        },
+        "event": {
+          "type": "HANDOFF",
+          "stage": "DESIGN",
+          "occurredAt": "2026-04-22T12:28:58.712Z",
+          "actorUserId": "david_ochieng",
+          "actorName": "David Ochieng"
+        },
+        "payload": {}
+      },
+      "traceContext": {},
+      "failedAt": "2026-04-26T05:29:01.516Z",
+      "reason": "Can't reach database server at `localhost:5432`\n\nPlease make sure your database server is running at `localhost:5432`."
+    },
+    {
+      "id": "evt_1777181340478_c7wmh75i",
+      "enqueuedAt": "2026-04-26T05:29:00.478Z",
+      "attempts": 3,
+      "normalized": {
+        "source": "ENGINEERING",
+        "sourceEventId": "E063-04",
+        "sourceSystem": "engineering",
+        "journeyExternalRef": "JRN-2025-0063",
+        "customer": {
+          "fullName": "Nyanza Flower Farms",
+          "email": "procurement@nyanzaflowers.co.ke",
+          "phone": "+254572021900",
+          "region": "Kisumu",
+          "customerCode": "CUST-0063"
+        },
+        "journey": {
+          "title": "Drip irrigation pump system — 40-acre flower farm",
+          "description": "Drip irrigation pump system — 40-acre flower farm"
+        },
+        "event": {
+          "type": "DOCUMENT_UPLOADED",
+          "stage": "DESIGN",
+          "occurredAt": "2026-04-22T21:28:58.712Z",
+          "actorUserId": "david_ochieng",
+          "actorName": "David Ochieng"
+        },
+        "payload": {
+          "doc": "hydraulic-design-nyanza.pdf"
+        }
+      },
+      "traceContext": {},
+      "failedAt": "2026-04-26T05:29:01.601Z",
+      "reason": "Can't reach database server at `localhost:5432`\n\nPlease make sure your database server is running at `localhost:5432`."
+    },
+    {
+      "id": "evt_1777181340901_rmpwb3x8",
+      "enqueuedAt": "2026-04-26T05:29:00.901Z",
+      "attempts": 3,
+      "normalized": {
+        "source": "CRM",
+        "sourceEventId": "E071-01",
+        "sourceSystem": "crm",
+        "journeyExternalRef": "JRN-2025-0071",
+        "customer": {
+          "fullName": "Rift Valley Dairy Co-op",
+          "email": "admin@rvdairy.co.ke",
+          "phone": "+254512213400",
+          "region": "Nakuru",
+          "customerCode": "CUST-0071"
+        },
+        "journey": {
+          "title": "Submersible pump + pressure tank — dairy processing plant",
+          "description": "Submersible pump + pressure tank — dairy processing plant"
+        },
+        "event": {
+          "type": "REQUEST_CREATED",
+          "stage": "INQUIRY",
+          "occurredAt": "2026-04-24T03:28:58.712Z",
+          "actorUserId": "faith_wanjiku",
+          "actorName": "Faith Wanjiku"
+        },
+        "payload": {}
+      },
+      "traceContext": {},
+      "failedAt": "2026-04-26T05:29:02.052Z",
+      "reason": "Can't reach database server at `localhost:5432`\n\nPlease make sure your database server is running at `localhost:5432`."
+    },
+    {
+      "id": "evt_1777181340985_jywzuhw6",
+      "enqueuedAt": "2026-04-26T05:29:00.985Z",
+      "attempts": 3,
+      "normalized": {
+        "source": "CRM",
+        "sourceEventId": "E071-02",
+        "sourceSystem": "crm",
+        "journeyExternalRef": "JRN-2025-0071",
+        "customer": {
+          "fullName": "Rift Valley Dairy Co-op",
+          "email": "admin@rvdairy.co.ke",
+          "phone": "+254512213400",
+          "region": "Nakuru",
+          "customerCode": "CUST-0071"
+        },
+        "journey": {
+          "title": "Submersible pump + pressure tank — dairy processing plant",
+          "description": "Submersible pump + pressure tank — dairy processing plant"
+        },
+        "event": {
+          "type": "STAGE_ENTERED",
+          "stage": "DESIGN",
+          "occurredAt": "2026-04-24T07:28:58.712Z",
+          "actorUserId": "faith_wanjiku",
+          "actorName": "Faith Wanjiku"
+        },
+        "payload": {}
+      },
+      "traceContext": {},
+      "failedAt": "2026-04-26T05:29:02.135Z",
+      "reason": "Can't reach database server at `localhost:5432`\n\nPlease make sure your database server is running at `localhost:5432`."
+    },
+    {
+      "id": "evt_1777181341069_74ubdfw7",
+      "enqueuedAt": "2026-04-26T05:29:01.069Z",
+      "attempts": 3,
+      "normalized": {
+        "source": "ENGINEERING",
+        "sourceEventId": "E071-03",
+        "sourceSystem": "engineering",
+        "journeyExternalRef": "JRN-2025-0071",
+        "customer": {
+          "fullName": "Rift Valley Dairy Co-op",
+          "email": "admin@rvdairy.co.ke",
+          "phone": "+254512213400",
+          "region": "Nakuru",
+          "customerCode": "CUST-0071"
+        },
+        "journey": {
+          "title": "Submersible pump + pressure tank — dairy processing plant",
+          "description": "Submersible pump + pressure tank — dairy processing plant"
+        },
+        "event": {
+          "type": "HANDOFF",
+          "stage": "DESIGN",
+          "occurredAt": "2026-04-24T08:28:58.712Z",
+          "actorUserId": "james_kamau",
+          "actorName": "James Kamau"
+        },
+        "payload": {}
+      },
+      "traceContext": {},
+      "failedAt": "2026-04-26T05:29:02.218Z",
+      "reason": "Can't reach database server at `localhost:5432`\n\nPlease make sure your database server is running at `localhost:5432`."
+    },
+    {
+      "id": "evt_1777181341152_v86e3xgt",
+      "enqueuedAt": "2026-04-26T05:29:01.152Z",
+      "attempts": 3,
+      "normalized": {
+        "source": "ENGINEERING",
+        "sourceEventId": "E071-04",
+        "sourceSystem": "engineering",
+        "journeyExternalRef": "JRN-2025-0071",
+        "customer": {
+          "fullName": "Rift Valley Dairy Co-op",
+          "email": "admin@rvdairy.co.ke",
+          "phone": "+254512213400",
+          "region": "Nakuru",
+          "customerCode": "CUST-0071"
+        },
+        "journey": {
+          "title": "Submersible pump + pressure tank — dairy processing plant",
+          "description": "Submersible pump + pressure tank — dairy processing plant"
+        },
+        "event": {
+          "type": "STAGE_COMPLETED",
+          "stage": "DESIGN",
+          "occurredAt": "2026-04-24T15:28:58.712Z",
+          "actorUserId": "james_kamau",
+          "actorName": "James Kamau"
+        },
+        "payload": {}
+      },
+      "traceContext": {},
+      "failedAt": "2026-04-26T05:29:02.335Z",
+      "reason": "Can't reach database server at `localhost:5432`\n\nPlease make sure your database server is running at `localhost:5432`."
+    },
+    {
+      "id": "evt_1777181342247_tf7d0ptr",
+      "enqueuedAt": "2026-04-26T05:29:02.247Z",
+      "attempts": 3,
+      "normalized": {
+        "source": "CRM",
+        "sourceEventId": "E055-06",
+        "sourceSystem": "crm",
+        "journeyExternalRef": "JRN-2025-0055",
+        "customer": {
+          "fullName": "Upperhill Apartments Ltd",
+          "email": "manager@upperhillapts.co.ke",
+          "phone": "+254202710500",
+          "region": "Nairobi",
+          "customerCode": "CUST-0055"
+        },
+        "journey": {
+          "title": "Booster pump system — 12-storey residential block, 3 pumps",
+          "description": "Booster pump system — 12-storey residential block, 3 pumps"
+        },
+        "event": {
+          "type": "STAGE_COMPLETED",
+          "stage": "QUOTATION",
+          "occurredAt": "2026-04-22T01:28:58.712Z",
+          "actorUserId": "lydia_muthoni",
+          "actorName": "Lydia Muthoni"
+        },
+        "payload": {}
+      },
+      "traceContext": {},
+      "failedAt": "2026-04-26T05:29:03.395Z",
+      "reason": "Can't reach database server at `localhost:5432`\n\nPlease make sure your database server is running at `localhost:5432`."
+    },
+    {
+      "id": "evt_1777181342333_pf4qq6qy",
+      "enqueuedAt": "2026-04-26T05:29:02.333Z",
+      "attempts": 3,
+      "normalized": {
+        "source": "ERP",
+        "sourceEventId": "E055-07",
+        "sourceSystem": "erp",
+        "journeyExternalRef": "JRN-2025-0055",
+        "customer": {
+          "fullName": "Upperhill Apartments Ltd",
+          "email": "manager@upperhillapts.co.ke",
+          "phone": "+254202710500",
+          "region": "Nairobi",
+          "customerCode": "CUST-0055"
+        },
+        "journey": {
+          "title": "Booster pump system — 12-storey residential block, 3 pumps",
+          "description": "Booster pump system — 12-storey residential block, 3 pumps"
+        },
+        "event": {
+          "type": "STAGE_ENTERED",
+          "stage": "DELIVERY",
+          "occurredAt": "2026-04-24T05:28:58.712Z",
+          "actorUserId": "logistics_erp",
+          "actorName": "Logistics ERP"
+        },
+        "payload": {}
+      },
+      "traceContext": {},
+      "failedAt": "2026-04-26T05:29:03.453Z",
+      "reason": "Can't reach database server at `localhost:5432`\n\nPlease make sure your database server is running at `localhost:5432`."
+    },
+    {
+      "id": "evt_1777181342417_7y57mmh7",
+      "enqueuedAt": "2026-04-26T05:29:02.417Z",
+      "attempts": 3,
+      "normalized": {
+        "source": "ERP",
+        "sourceEventId": "E055-08",
+        "sourceSystem": "erp",
+        "journeyExternalRef": "JRN-2025-0055",
+        "customer": {
+          "fullName": "Upperhill Apartments Ltd",
+          "email": "manager@upperhillapts.co.ke",
+          "phone": "+254202710500",
+          "region": "Nairobi",
+          "customerCode": "CUST-0055"
+        },
+        "journey": {
+          "title": "Booster pump system — 12-storey residential block, 3 pumps",
+          "description": "Booster pump system — 12-storey residential block, 3 pumps"
+        },
+        "event": {
+          "type": "DELIVERY_CONFIRMED",
+          "stage": "DELIVERY",
+          "occurredAt": "2026-04-25T09:28:58.712Z",
+          "actorUserId": "logistics_erp",
+          "actorName": "Logistics ERP"
+        },
+        "payload": {
+          "invoiceNo": "INV-2025-0055",
+          "deliveredBy": "Dayliff Nairobi Branch"
+        }
+      },
+      "traceContext": {},
+      "failedAt": "2026-04-26T05:29:03.550Z",
+      "reason": "Can't reach database server at `localhost:5432`\n\nPlease make sure your database server is running at `localhost:5432`."
+    },
+    {
+      "id": "evt_1777181342502_xwfzgw2h",
+      "enqueuedAt": "2026-04-26T05:29:02.502Z",
+      "attempts": 3,
+      "normalized": {
+        "source": "CRM",
+        "sourceEventId": "E082-01",
+        "sourceSystem": "crm",
+        "journeyExternalRef": "JRN-2025-0082",
+        "customer": {
+          "fullName": "Tana River County Government",
+          "email": "water@tanariver.go.ke",
+          "phone": "+254465522100",
+          "region": "Garissa",
+          "customerCode": "CUST-0082"
+        },
+        "journey": {
+          "title": "Solar-powered community water pumping station — 3 villages, 15,000 beneficiaries",
+          "description": "Solar-powered community water pumping station — 3 villages, 15,000 beneficiaries"
+        },
+        "event": {
+          "type": "REQUEST_CREATED",
+          "stage": "INQUIRY",
+          "occurredAt": "2026-04-25T11:28:58.712Z",
+          "actorUserId": "hassan_abdi",
+          "actorName": "Hassan Abdi"
+        },
+        "payload": {
+          "fundingSource": "World Bank WASH Grant",
+          "estimatedValue": 4200000
+        }
+      },
+      "traceContext": {},
+      "failedAt": "2026-04-26T05:29:03.670Z",
+      "reason": "Can't reach database server at `localhost:5432`\n\nPlease make sure your database server is running at `localhost:5432`."
+    },
+    {
+      "id": "evt_1777181342587_aqnxvlhb",
+      "enqueuedAt": "2026-04-26T05:29:02.587Z",
+      "attempts": 3,
+      "normalized": {
+        "source": "CRM",
+        "sourceEventId": "E082-02",
+        "sourceSystem": "crm",
+        "journeyExternalRef": "JRN-2025-0082",
+        "customer": {
+          "fullName": "Tana River County Government",
+          "email": "water@tanariver.go.ke",
+          "phone": "+254465522100",
+          "region": "Garissa",
+          "customerCode": "CUST-0082"
+        },
+        "journey": {
+          "title": "Solar-powered community water pumping station — 3 villages, 15,000 beneficiaries",
+          "description": "Solar-powered community water pumping station — 3 villages, 15,000 beneficiaries"
+        },
+        "event": {
+          "type": "COMMENT_ADDED",
+          "stage": "INQUIRY",
+          "occurredAt": "2026-04-25T13:28:58.712Z",
+          "actorUserId": "hassan_abdi",
+          "actorName": "Hassan Abdi"
+        },
+        "payload": {
+          "comment": "Donor reporting deadline: end of quarter. Expedited processing requested."
+        }
+      },
+      "traceContext": {},
+      "failedAt": "2026-04-26T05:29:03.739Z",
+      "reason": "Can't reach database server at `localhost:5432`\n\nPlease make sure your database server is running at `localhost:5432`."
+    },
+    {
+      "id": "evt_1777181342671_4604iiuq",
+      "enqueuedAt": "2026-04-26T05:29:02.671Z",
+      "attempts": 3,
+      "normalized": {
+        "source": "CRM",
+        "sourceEventId": "E082-03",
+        "sourceSystem": "crm",
+        "journeyExternalRef": "JRN-2025-0082",
+        "customer": {
+          "fullName": "Tana River County Government",
+          "email": "water@tanariver.go.ke",
+          "phone": "+254465522100",
+          "region": "Garissa",
+          "customerCode": "CUST-0082"
+        },
+        "journey": {
+          "title": "Solar-powered community water pumping station — 3 villages, 15,000 beneficiaries",
+          "description": "Solar-powered community water pumping station — 3 villages, 15,000 beneficiaries"
+        },
+        "event": {
+          "type": "STAGE_ENTERED",
+          "stage": "DESIGN",
+          "occurredAt": "2026-04-25T15:28:58.712Z",
+          "actorUserId": "hassan_abdi",
+          "actorName": "Hassan Abdi"
+        },
+        "payload": {}
+      },
+      "traceContext": {},
+      "failedAt": "2026-04-26T05:29:03.828Z",
+      "reason": "Can't reach database server at `localhost:5432`\n\nPlease make sure your database server is running at `localhost:5432`."
+    },
+    {
+      "id": "evt_1777181342758_coau5e6p",
+      "enqueuedAt": "2026-04-26T05:29:02.758Z",
+      "attempts": 3,
+      "normalized": {
+        "source": "ENGINEERING",
+        "sourceEventId": "E082-04",
+        "sourceSystem": "engineering",
+        "journeyExternalRef": "JRN-2025-0082",
+        "customer": {
+          "fullName": "Tana River County Government",
+          "email": "water@tanariver.go.ke",
+          "phone": "+254465522100",
+          "region": "Garissa",
+          "customerCode": "CUST-0082"
+        },
+        "journey": {
+          "title": "Solar-powered community water pumping station — 3 villages, 15,000 beneficiaries",
+          "description": "Solar-powered community water pumping station — 3 villages, 15,000 beneficiaries"
+        },
+        "event": {
+          "type": "HANDOFF",
+          "stage": "DESIGN",
+          "occurredAt": "2026-04-25T16:28:58.712Z",
+          "actorUserId": "fatuma_warsame",
+          "actorName": "Fatuma Warsame"
+        },
+        "payload": {}
+      },
+      "traceContext": {},
+      "failedAt": "2026-04-26T05:29:03.889Z",
+      "reason": "Can't reach database server at `localhost:5432`\n\nPlease make sure your database server is running at `localhost:5432`."
+    },
+    {
+      "id": "evt_1777181342842_21ydbww1",
+      "enqueuedAt": "2026-04-26T05:29:02.842Z",
+      "attempts": 3,
+      "normalized": {
+        "source": "ENGINEERING",
+        "sourceEventId": "E082-05",
+        "sourceSystem": "engineering",
+        "journeyExternalRef": "JRN-2025-0082",
+        "customer": {
+          "fullName": "Tana River County Government",
+          "email": "water@tanariver.go.ke",
+          "phone": "+254465522100",
+          "region": "Garissa",
+          "customerCode": "CUST-0082"
+        },
+        "journey": {
+          "title": "Solar-powered community water pumping station — 3 villages, 15,000 beneficiaries",
+          "description": "Solar-powered community water pumping station — 3 villages, 15,000 beneficiaries"
+        },
+        "event": {
+          "type": "COMMENT_ADDED",
+          "stage": "DESIGN",
+          "occurredAt": "2026-04-26T03:28:58.712Z",
+          "actorUserId": "fatuma_warsame",
+          "actorName": "Fatuma Warsame"
+        },
+        "payload": {
+          "comment": "Remote site survey scheduled for tomorrow. Solar irradiance data pulled from NASA POWER API."
+        }
+      },
+      "traceContext": {},
+      "failedAt": "2026-04-26T05:29:03.955Z",
+      "reason": "Can't reach database server at `localhost:5432`\n\nPlease make sure your database server is running at `localhost:5432`."
+    },
+    {
+      "id": "evt_1777181342928_r1ghwkfr",
+      "enqueuedAt": "2026-04-26T05:29:02.928Z",
+      "attempts": 3,
+      "normalized": {
+        "source": "CRM",
+        "sourceEventId": "E055-05",
+        "sourceSystem": "crm",
+        "journeyExternalRef": "JRN-2025-0082",
+        "customer": {
+          "fullName": "Tana River County Government",
+          "email": "water@tanariver.go.ke",
+          "phone": "+254465522100",
+          "region": "Garissa",
+          "customerCode": "CUST-0082"
+        },
+        "journey": {
+          "title": "Solar-powered community water pumping station — 3 villages, 15,000 beneficiaries",
+          "description": "Solar-powered community water pumping station — 3 villages, 15,000 beneficiaries"
+        },
+        "event": {
+          "type": "STAGE_ENTERED",
+          "stage": "QUOTATION",
+          "occurredAt": "2026-04-21T18:28:58.712Z",
+          "actorUserId": "lydia_muthoni",
+          "actorName": "Lydia Muthoni"
+        },
+        "payload": {}
+      },
+      "traceContext": {},
+      "failedAt": "2026-04-26T05:29:04.043Z",
+      "reason": "Can't reach database server at `localhost:5432`\n\nPlease make sure your database server is running at `localhost:5432`."
+    },
+    {
+      "id": "evt_1777181343013_sl3mfa9a",
+      "enqueuedAt": "2026-04-26T05:29:03.013Z",
+      "attempts": 3,
+      "normalized": {
+        "source": "CRM",
+        "sourceEventId": "E055-06",
+        "sourceSystem": "crm",
+        "journeyExternalRef": "JRN-2025-0082",
+        "customer": {
+          "fullName": "Tana River County Government",
+          "email": "water@tanariver.go.ke",
+          "phone": "+254465522100",
+          "region": "Garissa",
+          "customerCode": "CUST-0082"
+        },
+        "journey": {
+          "title": "Solar-powered community water pumping station — 3 villages, 15,000 beneficiaries",
+          "description": "Solar-powered community water pumping station — 3 villages, 15,000 beneficiaries"
+        },
+        "event": {
+          "type": "STAGE_COMPLETED",
+          "stage": "QUOTATION",
+          "occurredAt": "2026-04-22T01:28:58.712Z",
+          "actorUserId": "lydia_muthoni",
+          "actorName": "Lydia Muthoni"
+        },
+        "payload": {}
+      },
+      "traceContext": {},
+      "failedAt": "2026-04-26T05:29:04.134Z",
+      "reason": "Can't reach database server at `localhost:5432`\n\nPlease make sure your database server is running at `localhost:5432`."
+    },
+    {
+      "id": "evt_1777181343182_fie316bd",
+      "enqueuedAt": "2026-04-26T05:29:03.182Z",
+      "attempts": 3,
+      "normalized": {
+        "source": "ERP",
+        "sourceEventId": "E055-08",
+        "sourceSystem": "erp",
+        "journeyExternalRef": "JRN-2025-0082",
+        "customer": {
+          "fullName": "Tana River County Government",
+          "email": "water@tanariver.go.ke",
+          "phone": "+254465522100",
+          "region": "Garissa",
+          "customerCode": "CUST-0082"
+        },
+        "journey": {
+          "title": "Solar-powered community water pumping station — 3 villages, 15,000 beneficiaries",
+          "description": "Solar-powered community water pumping station — 3 villages, 15,000 beneficiaries"
+        },
+        "event": {
+          "type": "DELIVERY_CONFIRMED",
+          "stage": "DELIVERY",
+          "occurredAt": "2026-04-26T05:16:58.712Z",
+          "actorUserId": "logistics_erp",
+          "actorName": "Logistics ERP"
+        },
+        "payload": {
+          "invoiceNo": "INV-2025-0055",
+          "deliveredBy": "Dayliff Nairobi Branch"
+        }
+      },
+      "traceContext": {},
+      "failedAt": "2026-04-26T05:29:04.314Z",
+      "reason": "Can't reach database server at `localhost:5432`\n\nPlease make sure your database server is running at `localhost:5432`."
+    }
+  ]
 }
