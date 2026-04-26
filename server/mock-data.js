@@ -180,10 +180,17 @@ const JOURNEYS = [
   },
   title: 'Your journey title here',
   events: [
-    { system: 'crm', type: 'REQUEST_CREATED', stage: 'INQUIRY',
-      at: minsAgo(10), actor: 'Your Name', id: 'E090-01' },  // unique id
+     { system: 'crm',         type: 'REQUEST_CREATED',    stage: 'INQUIRY',   at: hoursAgo(10), actor: 'Sales Rep',   id: 'EX-01' },
+  { system: 'crm',         type: 'STAGE_ENTERED',      stage: 'DESIGN',    at: hoursAgo(8),  actor: 'Sales Rep',   id: 'EX-02' },
+  { system: 'engineering', type: 'HANDOFF',            stage: 'DESIGN',    at: hoursAgo(7),  actor: 'Engineer',    id: 'EX-03' },
+  { system: 'engineering', type: 'STAGE_COMPLETED',    stage: 'DESIGN',    at: hoursAgo(5),  actor: 'Engineer',    id: 'EX-04' },
+  { system: 'crm',         type: 'STAGE_ENTERED',      stage: 'QUOTATION', at: hoursAgo(4),  actor: 'Sales Rep',   id: 'EX-05' },
+  { system: 'crm',         type: 'STAGE_COMPLETED',    stage: 'QUOTATION', at: hoursAgo(2),  actor: 'Sales Rep',   id: 'EX-06' },
+  { system: 'erp',         type: 'STAGE_ENTERED',      stage: 'DELIVERY',  at: hoursAgo(1),  actor: 'Logistics',   id: 'EX-07' },
+  { system: 'erp',         type: 'DELIVERY_CONFIRMED', stage: 'DELIVERY',  at: minsAgo(30),  actor: 'Logistics',   id: 'EX-08' }, // unique id
   ],
 },
+
 ];
 
 // ─── seed ────────────────────────────────────────────────────────────────────
