@@ -144,8 +144,7 @@ async function enqueueFileState(normalized, options = {}) {
   state.queue.push(message);
   persistStateToDisk();
   emitter.emit('queue:message');
-  console.log("[Event Bus] message: ", message);
-
+  
   return message;
 }
 
